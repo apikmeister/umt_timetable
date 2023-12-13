@@ -398,7 +398,7 @@ packages:
     description:
       path: "."
       ref: main
-      resolved-ref: "5373f88d5742c65e609326bec6faa168b117e12f"
+      resolved-ref: "2aa00d06f7b62e824c13e5dcf9e04ce54c6e07cf"
       url: "https://github.com/apikmeister/umt-timetable-parser.git"
     source: git
     version: "1.0.0"
