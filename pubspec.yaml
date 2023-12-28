@@ -33,6 +33,7 @@ dependencies:
   intl: ^0.18.1
   google_fonts: ^6.1.0
   lottie: ^2.7.0
+  flutter_colorpicker: ^1.0.3
 
   flutter_timetable_view:
     git:
