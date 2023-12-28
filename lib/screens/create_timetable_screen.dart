@@ -48,7 +48,6 @@ class _CreateTimetableState extends State<CreateTimetable> {
             Text(
               'Create\nNew Timetable',
               style: GoogleFonts.inter(
-                // textStyle: Theme.of(context).textTheme.displayLarge,
                 fontSize: 30,
                 fontWeight: FontWeight.w900,
                 fontStyle: FontStyle.italic,
@@ -57,8 +56,14 @@ class _CreateTimetableState extends State<CreateTimetable> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                const Text(
+                  '*Please select your study grade and semester',
+                  style: TextStyle(
+                    color: Colors.red,
+                  ),
+                ),
                 const SizedBox(height: 20),
-                Text('Study Grade'),
+                const Text('Study Grade'),
                 const SizedBox(height: 10),
                 FutureBuilder(
                   future: _studyGradeDropdown(),
@@ -72,27 +77,41 @@ class _CreateTimetableState extends State<CreateTimetable> {
                   },
                 ),
                 const SizedBox(height: 20),
-                // FutureBuilder(future: _dropdownSemester(), builder: builder)
-                // _dropdownSemester(),
-                FutureBuilder(
-                  future: _semesterDropdown(),
-                  builder: (context, snapshot) {
-                    if (snapshot.hasData) {
-                      return snapshot.data!;
-                    } else if (snapshot.hasError) {
-                      return Text('${snapshot.error}');
-                    }
-                    return const Center(child: CircularProgressIndicator());
-                  },
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Semester',
+                    ),
+                    const SizedBox(height: 10),
+                    // children: [
+                    FutureBuilder(
+                      future: _semesterDropdown(),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData) {
+                          return snapshot.data!;
+                        } else if (snapshot.hasError) {
+                          return Text('${snapshot.error}');
+                        }
+                        return const Center(child: CircularProgressIndicator());
+                      },
+                    ),
+                  ],
                 ),
               ],
             ),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
+                var newTimetableProvider =
+                    Provider.of<NewTimetableProvider>(context, listen: false);
+                if (newTimetableProvider.selectedSession == null ||
+                    selectedSemester == null) {
+                  return;
+                }
                 Navigator.pushNamed(context, '/choose_program');
               },
-              child: Text('Next'),
+              child: const Text('Next'),
             ),
           ],
         ),
@@ -124,101 +143,21 @@ class _CreateTimetableState extends State<CreateTimetable> {
         );
       }).toList();
 
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Semester',
-          ),
-          const SizedBox(height: 10),
-          DropdownMenu(
-            dropdownMenuEntries: dropdownMenuItems,
-            hintText: "Semester",
-            onSelected: (value) {
-              Provider.of<NewTimetableProvider>(context, listen: false)
-                  .setSelectedSession(value);
-              setState(() {
-                selectedSemester = value;
-              });
-              // setState(() {
-              //   selectedSemester = value!;
-              // });
-            },
-          ),
-        ],
+      return DropdownMenu(
+        dropdownMenuEntries: dropdownMenuItems,
+        hintText: "Semester",
+        onSelected: (value) {
+          Provider.of<NewTimetableProvider>(context, listen: false)
+              .setSelectedSession(value);
+          setState(() {
+            selectedSemester = value;
+          });
+        },
       );
     } catch (e) {
       return Text('Error: ${e.toString()}');
     }
   }
-
-  // List<DropdownMenuEntry> _semesterDropdown() {
-  //   List<DropdownMenuEntry> dropdownMenuItems = [];
-  //   if (selectedStudyGrade == null) {
-  //     return []; // Return an empty widget if no study grade is selected
-  //   }
-
-  //   FutureBuilder(
-  //     future:
-  //         getSemester(), // Replace this with the actual method that fetches the data
-  //     builder: (context, snapshot) {
-  //       if (snapshot.connectionState == ConnectionState.waiting) {
-  //         return const Center(child: CircularProgressIndicator());
-  //       } else if (snapshot.hasError) {
-  //         return Text('Error: ${snapshot.error}');
-  //       }
-
-  //       Iterable l = jsonDecode(snapshot.data as String);
-  //       List<Semester> filteredEntries = l
-  //           .map((model) => Semester.fromJson(model as Map<String, dynamic>))
-  //           .toList()
-  //           .where((entry) => entry.studyGrade == selectedStudyGrade)
-  //           .toList();
-
-  //       // List<DropdownMenuEntry> dropdownMenuItems =
-  //       //     filteredEntries.map((Semester entry) {
-  //       //   return DropdownMenuEntry(
-  //       //     label: entry.semesterName,
-  //       //     value: entry.semesterCode,
-  //       //   );
-  //       // }).toList();
-
-  //       dropdownMenuItems = filteredEntries.map((Semester entry) {
-  //         return DropdownMenuEntry(
-  //           label: entry.semesterName,
-  //           value: entry.semesterCode,
-  //         );
-  //       }).toList();
-
-  //       return Container();
-
-  //       // return DropdownMenu(
-  //       //   dropdownMenuEntries: dropdownMenuItems,
-  //       //   hintText: "Semester",
-  //       //   onSelected: (value) {
-  //       //     setState(() {
-  //       //       // selectedStudyGrade = value;
-  //       //       selectedSemester = value;
-  //       //     });
-  //       //   },
-  //       // );
-  //     },
-  //   );
-  //   return dropdownMenuItems;
-  // }
-
-  // Widget _dropdownSemester() {
-  //   return DropdownMenu(
-  //     dropdownMenuEntries: _semesterDropdown(),
-  //     hintText: "Semester",
-  //     onSelected: (value) {
-  //       setState(() {
-  //         // selectedStudyGrade = value;
-  //         selectedSemester = value;
-  //       });
-  //     },
-  //   );
-  // }
 
   Future<Widget> _studyGradeDropdown() async {
     try {
@@ -250,52 +189,10 @@ class _CreateTimetableState extends State<CreateTimetable> {
             selectedStudyGrade = value;
             selectedSemester = null;
           });
-          // setState(() {
-          //   selectedStudyGrade = value!;
-          // });
         },
       );
     } catch (e) {
       return Text('Error: ${e.toString()}');
     }
   }
-
-  // return FutureBuilder<List<String>>(
-  //   future: marinerBase.getSemester(),
-  //   builder: (context, snapshot) {
-  //     if (snapshot.connectionState == ConnectionState.waiting) {
-  //       return CircularProgressIndicator();
-  //     } else if (snapshot.hasError) {
-  //       return Text('Error: ${snapshot.error}');
-  //     } else {
-  //       return Container(
-  //         padding: const EdgeInsets.symmetric(horizontal: 10.0),
-  //         decoration: BoxDecoration(
-  //           borderRadius: BorderRadius.circular(10.0),
-  //           border: Border.all(
-  //             color: Colors.grey.withOpacity(0.5),
-  //             width: 1.0,
-  //           ),
-  //         ),
-  //         child: DropdownButtonHideUnderline(
-  //           child: DropdownButton<String>(
-  //             value: _semester,
-  //             isExpanded: true,
-  //             items: snapshot.data.map((String value) {
-  //               return DropdownMenuItem<String>(
-  //                 value: value,
-  //                 child: Text(value),
-  //               );
-  //             }).toList(),
-  //             onChanged: (String value) {
-  //               setState(() {
-  //                 _semester = value;
-  //               });
-  //             },
-  //           ),
-  //         ),
-  //       );
-  //     }
-  //   },
-  // );
 }
