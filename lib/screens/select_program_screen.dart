@@ -16,6 +16,8 @@ class _SelectProgramState extends State<SelectProgram> {
   String? sessCode;
   String? selectedFaculty;
   String? selectedProgram;
+  Map<String, String?> selectedGroups = {};
+  Map<String, String?> unselectedGroups = {};
   ValueNotifier<String?> selectedFacultyNotifier = ValueNotifier<String?>(null);
 
   @override
@@ -63,7 +65,7 @@ class _SelectProgramState extends State<SelectProgram> {
                 builder: (context, snapshot) {
                   switch (snapshot.connectionState) {
                     case ConnectionState.waiting:
-                      return Text('Loading...'); // Show loading indicator
+                      return const Text('Loading...'); // Show loading indicator
                     case ConnectionState.done:
                       if (snapshot.hasError) {
                         return Text('Error: ${snapshot.error}');
@@ -71,29 +73,10 @@ class _SelectProgramState extends State<SelectProgram> {
                         return snapshot.data!;
                       }
                     default:
-                      return SizedBox.shrink();
+                      return const SizedBox.shrink();
                   }
                 },
-                //   if (snapshot.hasData) {
-                //     return snapshot.data!;
-                //   } else if (snapshot.hasError) {
-                //     return const Text('Error');
-                //   }
-                //   return const Text('Loading...');
-                // },
               ),
-            // ElevatedButton(
-            //   onPressed: (selectedFaculty != null && selectedProgram != null)
-            //       ? () {
-            //           Navigator.pushNamed(context, '/view_timetable',
-            //               arguments: {
-            //                 'studyGrade': selectedProgram,
-            //                 'semester': '1',
-            //               });
-            //         }
-            //       : null,
-            //   child: Text('Generate Timetable'),
-            // ),
           ],
         ),
       ),
@@ -102,19 +85,18 @@ class _SelectProgramState extends State<SelectProgram> {
 
   Future<Widget> _facultyDropdown() async {
     try {
-      String programJson = await getProgram("S202324-I");
+      String programJson = await getProgram(
+          Provider.of<NewTimetableProvider>(context, listen: false)
+              .selectedSession!);
       Map<String, dynamic> data = jsonDecode(programJson);
-      // List<Faculty> programs = List<Faculty>.from(
-      //     data.values.map((model) => Faculty.fromJson(model)).toList());
       List<Faculty> faculty = List<Faculty>.from(data.values
           .map((model) => Faculty.fromJson(model))
-          .where((program) => program != null && program.facultyName.isNotEmpty)
+          .where((program) => program.facultyName.isNotEmpty)
           .toList());
 
       List<DropdownMenuEntry> dropdownMenuEntries = faculty.map((program) {
         return DropdownMenuEntry(
           label: program.facultyName,
-          // child: Text(program.name),
           value: program.facultyName,
         );
       }).toList();
@@ -124,7 +106,6 @@ class _SelectProgramState extends State<SelectProgram> {
         hintText: 'Fakulti',
         onSelected: (value) {
           setState(() {
-            // selectedProgram = value;
             selectedFaculty = value;
           });
         },
@@ -136,19 +117,26 @@ class _SelectProgramState extends State<SelectProgram> {
 
   Future<Widget> _programList() async {
     try {
-      String programJson = await getProgram("S202324-I");
+      String programJson = await getProgram(
+          Provider.of<NewTimetableProvider>(context, listen: false)
+              .selectedSession!);
       Map<String, dynamic> data = jsonDecode(programJson);
-      // List<Faculty> programs = List<Faculty>.from(
-      //     data.values.map((model) => Faculty.fromJson(model)).toList());
       Faculty selectedFacultyObject = Faculty.fromJson(data[selectedFaculty]);
       List<Program> programs = selectedFacultyObject.programs;
-      // List<Faculty> programs = List<Faculty>.from(data.values
-      //     .map((model) => Faculty.fromJson(model))
-      //     .where((program) =>
-      //         program != null &&
-      //         program.facultyName == selectedFaculty &&
-      //         program.facultyName.isNotEmpty)
-      //     .toList());
+      // var selectedByUser =
+      //     Provider.of<NewTimetableProvider>(context, listen: false);
+
+      //THIS IS FOR TAHUN
+      // var marinerBase = MarinerBase(
+      //     session: selectedByUser.selectedSession!,
+      //     program: selectedByUser.selectedProgram!);
+      // String timetableJson = await marinerBase.getTimetable();
+
+      // Iterable l = jsonDecode(timetableJson);
+      // List<MarineSchedule> entries = List<MarineSchedule>.from(
+      //     l.map((model) => MarineSchedule.fromJson(model)));
+      // // List<String> tahunList =
+      // //     entries.map((entry) => entry.tahun).toSet().toList();
 
       return Expanded(
         child: ListView.builder(
@@ -162,15 +150,19 @@ class _SelectProgramState extends State<SelectProgram> {
               onTap: () {
                 Provider.of<NewTimetableProvider>(context, listen: false)
                     .setSelectedProgram(programs[index].programCode);
-                setState(() {
-                  selectedProgram = programs[index].programCode;
-                });
-                Navigator.pushNamed(context, '/view_timetable');
-                // Navigator.pushNamed(context, '/view_timetable', arguments: {
-                //   'studyGrade': programs[index].studyGrade,
-                //   'semester': programs[index].semester,
+                // _yearSelector(context, tahunList);
+                showTahunDialog();
+                // showTahunDialog(context);
+                // print(tahunList);
+                // print(timetableJson);
+                // Provider.of<NewTimetableProvider>(context, listen: false)
+                //     .setSelectedProgram(programs[index].programCode);
+                // setState(() {
+                //   selectedProgram = programs[index].programCode;
+                // });
+                // Navigator.pushNamed(context, '/view_timetable');
               },
-              trailing: Icon(
+              trailing: const Icon(
                 Icons.arrow_forward_ios,
                 size: 15,
               ),
@@ -181,5 +173,165 @@ class _SelectProgramState extends State<SelectProgram> {
     } catch (e) {
       return Text('Error: ${e.toString()}');
     }
+  }
+
+  void showTahunDialog() {
+    var marinerBase = MarinerBase(
+        session: Provider.of<NewTimetableProvider>(context, listen: false)
+            .selectedSession!,
+        program: Provider.of<NewTimetableProvider>(context, listen: false)
+            .selectedProgram!);
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) {
+        return FutureBuilder(
+          future: marinerBase.getTimetable(),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              String timetableJson = snapshot.data as String;
+              Iterable l = jsonDecode(timetableJson);
+              List<MarineSchedule> entries = List<MarineSchedule>.from(
+                  l.map((model) => MarineSchedule.fromJson(model)));
+              List<String> tahunList =
+                  entries.map((entry) => entry.tahun).toSet().toList();
+              return AnimatedPadding(
+                padding: MediaQuery.of(context).viewInsets,
+                duration: const Duration(milliseconds: 100),
+                curve: Curves.decelerate,
+                child: SizedBox(
+                  height: 350,
+                  child: Column(
+                    children: [
+                      const Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: Text(
+                          'Tahun',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: ListView.builder(
+                          itemCount: tahunList.length,
+                          itemBuilder: (context, index) {
+                            return ListTile(
+                              title: Text(tahunList[index]),
+                              onTap: () {
+                                Provider.of<NewTimetableProvider>(context,
+                                        listen: false)
+                                    .setSelectedYear(tahunList[index]);
+                                showDuplicateDialog(entries);
+                              },
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            } else if (snapshot.hasError) {
+              return const Text('Error');
+            }
+            return Container(
+              height: 200,
+              child: const Center(
+                child: CircularProgressIndicator(),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void showDuplicateDialog(List<MarineSchedule> entries) {
+    var year =
+        Provider.of<NewTimetableProvider>(context, listen: false).selectedYear;
+    List<String> courses = entries
+        .where((entry) => entry.tahun == year && entry.elektif == false)
+        .map((entry) => entry.course)
+        .toSet()
+        .toList();
+    Map<String, List<String>> groupsByCourse = {};
+    for (String course in courses) {
+      List<String> groups = entries
+          .where((entry) => entry.course == course)
+          .map((entry) => entry.group)
+          .toSet()
+          .toList();
+      groupsByCourse[course] = groups;
+    }
+    List<dynamic> coursesWithMultipleGroups = [];
+    for (String course in groupsByCourse.keys) {
+      if (groupsByCourse[course]!.length > 1) {
+        coursesWithMultipleGroups.add(course);
+      }
+    }
+
+    for (String course in coursesWithMultipleGroups) {
+      selectedGroups[course] =
+          null; // Initially, no group is selected for each course
+      unselectedGroups[course] = null;
+    }
+    coursesWithMultipleGroups.isEmpty
+        ? Navigator.pushNamed(context, '/view_timetable')
+        : showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return StatefulBuilder(
+                // Use StatefulBuilder to update the state of the dialog
+                builder: (BuildContext context, StateSetter setState) {
+                  return AlertDialog(
+                    title: const Text('Duplicate Courses'),
+                    content: SingleChildScrollView(
+                      child: ListBody(
+                        children: coursesWithMultipleGroups.map((course) {
+                          return ExpansionTile(
+                            // Use ExpansionTile to show the groups when the course is tapped
+                            title: Text(course),
+                            children: groupsByCourse[course]!.map((group) {
+                              return RadioListTile.adaptive(
+                                title: Text(group),
+                                value: group,
+                                groupValue: selectedGroups[course],
+                                onChanged: (String? value) {
+                                  setState(() {
+                                    selectedGroups[course] = value;
+                                    print(selectedGroups[course]);
+
+                                    unselectedGroups[course] =
+                                        groupsByCourse[course]
+                                            ?.where((group) => group != value)
+                                            .toList()
+                                            .join(', ');
+                                    Provider.of<NewTimetableProvider>(context,
+                                            listen: false)
+                                        .setUnselectedGroup(unselectedGroups);
+                                    print(unselectedGroups);
+                                  });
+                                },
+                              );
+                            }).toList(),
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                    actions: [
+                      TextButton(
+                        child: const Text('Ok'),
+                        onPressed: () {
+                          Navigator.pushNamed(context, '/view_timetable');
+                        },
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
+          );
   }
 }
