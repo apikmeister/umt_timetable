@@ -34,7 +34,7 @@ class MyApp extends StatelessWidget {
           '/view_timetable': (context) => const TimetableScreen(),
           '/create_timetable': (context) => const CreateTimetable(),
         },
-        title: 'Flutter Calendar UI',
+        title: 'UMT Timetable',
         theme: ThemeData.light().copyWith(
           textTheme: GoogleFonts.interTextTheme(
             Theme.of(context).textTheme,
