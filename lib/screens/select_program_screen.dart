@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:umt_timetable/providers/new_timetable_provider.dart';
 import 'package:umt_timetable_parser/umt_timetable_parser.dart';
@@ -53,6 +54,8 @@ class _SelectProgramState extends State<SelectProgram> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            Text('Faculty', style: GoogleFonts.inter(fontSize: 16)),
+            const SizedBox(height: 10),
             FutureBuilder(
                 future: _facultyDropdown(),
                 builder: (context, snapshot) {
@@ -63,6 +66,7 @@ class _SelectProgramState extends State<SelectProgram> {
                   }
                   return const Text('Loading...');
                 }),
+            const SizedBox(height: 10),
             if (selectedFaculty != null)
               FutureBuilder(
                 future: _programList(),
@@ -127,20 +131,6 @@ class _SelectProgramState extends State<SelectProgram> {
       Map<String, dynamic> data = jsonDecode(programJson);
       Faculty selectedFacultyObject = Faculty.fromJson(data[selectedFaculty]);
       List<Program> programs = selectedFacultyObject.programs;
-      // var selectedByUser =
-      //     Provider.of<NewTimetableProvider>(context, listen: false);
-
-      //THIS IS FOR TAHUN
-      // var marinerBase = MarinerBase(
-      //     session: selectedByUser.selectedSession!,
-      //     program: selectedByUser.selectedProgram!);
-      // String timetableJson = await marinerBase.getTimetable();
-
-      // Iterable l = jsonDecode(timetableJson);
-      // List<MarineSchedule> entries = List<MarineSchedule>.from(
-      //     l.map((model) => MarineSchedule.fromJson(model)));
-      // // List<String> tahunList =
-      // //     entries.map((entry) => entry.tahun).toSet().toList();
 
       return Expanded(
         child: ListView.builder(
@@ -164,7 +154,6 @@ class _SelectProgramState extends State<SelectProgram> {
                     ];
                   },
                   onModalDismissedWithBarrierTap: () {
-                    debugPrint('Closed modal sheet with barrier tap');
                     Navigator.of(context).pop();
                     pageIndexNotifier.value = 0;
                   },
@@ -173,16 +162,6 @@ class _SelectProgramState extends State<SelectProgram> {
                   minPageHeight: 0.0,
                   maxPageHeight: 0.9,
                 );
-                // showTahunDialog(); //TODO: maybe change this or nah
-                // showTahunDialog(context);
-                // print(tahunList);
-                // print(timetableJson);
-                // Provider.of<NewTimetableProvider>(context, listen: false)
-                //     .setSelectedProgram(programs[index].programCode);
-                // setState(() {
-                //   selectedProgram = programs[index].programCode;
-                // });
-                // Navigator.pushNamed(context, '/view_timetable');
               },
               trailing: const Icon(
                 Icons.arrow_forward_ios,
@@ -258,9 +237,9 @@ class _SelectProgramState extends State<SelectProgram> {
             } else if (snapshot.hasError) {
               return const Text('Error');
             }
-            return Container(
+            return const SizedBox(
               height: 200,
-              child: const Center(
+              child: Center(
                 child: CircularProgressIndicator(),
               ),
             );
@@ -323,7 +302,6 @@ class _SelectProgramState extends State<SelectProgram> {
                                 onChanged: (String? value) {
                                   setState(() {
                                     selectedGroups[course] = value;
-                                    print(selectedGroups[course]);
 
                                     unselectedGroups[course] =
                                         groupsByCourse[course]
@@ -333,7 +311,6 @@ class _SelectProgramState extends State<SelectProgram> {
                                     Provider.of<NewTimetableProvider>(context,
                                             listen: false)
                                         .setUnselectedGroup(unselectedGroups);
-                                    print(unselectedGroups);
                                   });
                                 },
                               );
@@ -364,21 +341,6 @@ class _SelectProgramState extends State<SelectProgram> {
             .selectedSession!,
         program: Provider.of<NewTimetableProvider>(context, listen: false)
             .selectedProgram!);
-    // void setProvider() async {
-    //   await marinerBase.getTimetable().then((value) {
-    //     // String timetableJson = snapshot.data as String;
-
-    //     Iterable l = jsonDecode(value);
-    //     List<MarineSchedule> entries = List<MarineSchedule>.from(
-    //         l.map((model) => MarineSchedule.fromJson(model)));
-    //     Provider.of<NewTimetableProvider>(context, listen: false)
-    //         .setEntries(entries);
-    //     print(
-    //         Provider.of<NewTimetableProvider>(context, listen: false).entries);
-    //   });
-    // }
-
-    // setProvider();
 
     return WoltModalSheetPage(
       navBarHeight: 56,
@@ -389,11 +351,10 @@ class _SelectProgramState extends State<SelectProgram> {
         icon: const Icon(Icons.close),
         onPressed: Navigator.of(modalSheetContext).pop,
       ),
-      pageTitle: Padding(
-        padding: const EdgeInsets.all(16.0),
+      pageTitle: const Padding(
+        padding: EdgeInsets.all(16.0),
         child: Text(
           'Choose Your Current Year of Studies',
-          // style: textTheme.headline6,
         ),
       ),
       child: FutureBuilder(
@@ -404,10 +365,6 @@ class _SelectProgramState extends State<SelectProgram> {
             Iterable l = jsonDecode(timetableJson);
             List<MarineSchedule> entries = List<MarineSchedule>.from(
                 l.map((model) => MarineSchedule.fromJson(model)));
-            // Provider.of<NewTimetableProvider>(context, listen: false)
-            //     .setEntries(entries);
-            // print(Provider.of<NewTimetableProvider>(context, listen: false)
-            //     .entries);
             List<String> tahunList =
                 entries.map((entry) => entry.tahun).toSet().toList();
             return AnimatedPadding(
@@ -444,7 +401,6 @@ class _SelectProgramState extends State<SelectProgram> {
                                 pageListBuilder: (modalSheetContext) {
                                   final textTheme = Theme.of(context).textTheme;
                                   return [
-                                    // page1(modalSheetContext, textTheme),
                                     page2(
                                         modalSheetContext, textTheme, entries),
                                     page3(modalSheetContext, textTheme),
@@ -453,19 +409,7 @@ class _SelectProgramState extends State<SelectProgram> {
                                 modalTypeBuilder: (context) {
                                   return WoltModalType.dialog;
                                 },
-                                // useSafeArea: true,
-                                // (context) {
-                                //   final size =
-                                //       MediaQuery.of(context).size.width;
-                                //   if (size < 768.0) {
-                                //     return WoltModalType.bottomSheet;
-                                //   } else {
-                                //     return WoltModalType.dialog;
-                                //   }
-                                // },
                                 onModalDismissedWithBarrierTap: () {
-                                  debugPrint(
-                                      'Closed modal sheet with barrier tap');
                                   Navigator.of(context).pop();
                                   pageIndexNotifier.value = 0;
                                 },
@@ -474,9 +418,6 @@ class _SelectProgramState extends State<SelectProgram> {
                                 minPageHeight: 0.0,
                                 maxPageHeight: 0.9,
                               );
-                              // page2(modalSheetContext, textTheme, entries);
-                              // pageIndexNotifier.value += 1;
-                              // showDuplicateDialog(entries);
                             },
                           );
                         },
@@ -497,40 +438,11 @@ class _SelectProgramState extends State<SelectProgram> {
           );
         },
       ),
-      // Padding(
-      //   padding: const EdgeInsets.all(8.0),
-      //   child: Column(
-      //     children: [
-      //       Text('Hello From Page 1'),
-      //       ElevatedButton(
-      //         onPressed: () {
-      //           pageIndexNotifier.value += 1;
-      //         },
-      //         style: ElevatedButton.styleFrom(
-      //           shape: RoundedRectangleBorder(
-      //             borderRadius: BorderRadius.circular(8),
-      //           ),
-      //         ),
-      //         child: SizedBox(
-      //           height: 20,
-      //           width: double.infinity,
-      //           child: AnimatedSwitcher(
-      //             duration: const Duration(milliseconds: 250),
-      //             child: Text('Go to Page 2'),
-      //           ),
-      //         ),
-      //       ),
-      //     ],
-      //   ),
-      // ),
     );
   }
 
   WoltModalSheetPage page2(BuildContext modalSheetContext, TextTheme textTheme,
       List<MarineSchedule> entries) {
-    // List<MarineSchedule>? entries;
-    // entries =
-    //     Provider.of<NewTimetableProvider>(context, listen: false).tempEntries!;
     var year =
         Provider.of<NewTimetableProvider>(context, listen: false).selectedYear;
     List<String> courses = entries
@@ -560,8 +472,8 @@ class _SelectProgramState extends State<SelectProgram> {
       unselectedGroups[course] = null;
     }
     var woltModalSheetPage = WoltModalSheetPage(
-      pageTitle: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      pageTitle: const Padding(
+        padding: EdgeInsets.symmetric(horizontal: 16.0),
         child: Text(
           'Choose Your Group for Program(s) Down Below',
           // style: textTheme.headline6,
@@ -581,14 +493,13 @@ class _SelectProgramState extends State<SelectProgram> {
                         // Use ExpansionTile to show the groups when the course is tapped
                         title: Text(course),
                         children: groupsByCourse[course]!.map((group) {
-                          return RadioListTile.adaptive(
+                          return RadioListTile(
                             title: Text(group),
                             value: group,
                             groupValue: selectedGroups[course],
                             onChanged: (String? value) {
                               setState(() {
                                 selectedGroups[course] = value;
-                                print(selectedGroups[course]);
 
                                 unselectedGroups[course] =
                                     groupsByCourse[course]
@@ -598,7 +509,6 @@ class _SelectProgramState extends State<SelectProgram> {
                                 Provider.of<NewTimetableProvider>(context,
                                         listen: false)
                                     .setUnselectedGroup(unselectedGroups);
-                                print(unselectedGroups);
                                 canProceed = selectedGroups.values
                                     .every((value) => value != null);
                               });
@@ -614,18 +524,18 @@ class _SelectProgramState extends State<SelectProgram> {
                         pageIndexNotifier.value += 1;
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
+                          const SnackBar(
                             content: Text(
                                 'Please select all options before proceeding.'),
                           ),
                         );
                       }
                     },
-                    child: SizedBox(
+                    child: const SizedBox(
                       height: 20,
                       width: double.infinity,
                       child: AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 250),
+                        duration: Duration(milliseconds: 250),
                         child: Text('Next'),
                       ),
                     ),
@@ -636,17 +546,6 @@ class _SelectProgramState extends State<SelectProgram> {
           );
         },
       ),
-      // Column(
-      //   children: [
-      //     Text('Hello From Page 2'),
-      //     ElevatedButton(
-      //       onPressed: () {
-      //         pageIndexNotifier.value -= 1;
-      //       },
-      //       child: const Text('Go Back'),
-      //     ),
-      //   ],
-      // ),
       leadingNavBarWidget: IconButton(
         padding: const EdgeInsets.all(8),
         icon: const Icon(Icons.arrow_back_rounded),
@@ -670,13 +569,12 @@ class _SelectProgramState extends State<SelectProgram> {
 
   WoltModalSheetPage page3(
       BuildContext modalSheetContext, TextTheme textTheme) {
-    TextEditingController _timetableNameController = TextEditingController();
+    TextEditingController timetableNameController = TextEditingController();
     return WoltModalSheetPage(
-      pageTitle: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      pageTitle: const Padding(
+        padding: EdgeInsets.symmetric(horizontal: 16.0),
         child: Text(
           'Give Your Timetable a Name',
-          // style: textTheme.headline6,
         ),
       ),
       child: Padding(
@@ -684,27 +582,27 @@ class _SelectProgramState extends State<SelectProgram> {
         child: Column(
           children: [
             TextField(
-              controller: _timetableNameController,
-              decoration: InputDecoration(
+              controller: timetableNameController,
+              decoration: const InputDecoration(
                 hintText: 'Enter your timetable name',
               ),
             ),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                // Navigator.of(modalSheetContext).pop();
-                if (_timetableNameController.text.isNotEmpty) {
+                if (timetableNameController.text.isNotEmpty) {
                   Provider.of<NewTimetableProvider>(context, listen: false)
-                      .setTimetableName(_timetableNameController.text);
+                      .setTimetableName(timetableNameController.text);
                   Navigator.pushNamed(context, '/view_timetable');
                 } else {
                   return;
                 }
               },
-              child: SizedBox(
+              child: const SizedBox(
                 height: 20,
                 width: double.infinity,
                 child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 250),
+                  duration: Duration(milliseconds: 250),
                   child: Text('Generate Timetable'),
                 ),
               ),

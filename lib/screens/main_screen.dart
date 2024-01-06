@@ -15,7 +15,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  // final List<LaneEvents> timetableEvents;
   bool hasTimetable = false;
   List<String> timetableList = [
     'Monday',
@@ -32,7 +31,6 @@ class _HomeScreenState extends State<HomeScreen> {
       if (key.startsWith('timetable_')) {
         String? timetableJson = prefs.getString(key);
         if (timetableJson != null) {
-          // hasTimetable = true;
           List<MarineSchedule> timetable = (jsonDecode(timetableJson) as List)
               .map((e) => MarineSchedule.fromJson(e))
               .toList();
@@ -40,7 +38,6 @@ class _HomeScreenState extends State<HomeScreen> {
         }
       }
     });
-    // await prefs.clear(); //FIXME:
     return savedTimetables;
   }
 
@@ -48,12 +45,6 @@ class _HomeScreenState extends State<HomeScreen> {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.remove(key);
   }
-
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   getTimetableList();
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -91,7 +82,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ],
                     ),
-                    // Spacer(),
                     Expanded(
                       child: FutureBuilder(
                         future: getTimetableList(),
@@ -100,11 +90,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                 snapshot) {
                           if (snapshot.connectionState ==
                               ConnectionState.waiting) {
-                            return Center(child: CircularProgressIndicator());
+                            return const Center(
+                                child: CircularProgressIndicator());
                           } else if (snapshot.hasError) {
                             return Text('Error: ${snapshot.error}');
                           } else {
-                            print(snapshot.data);
                             hasTimetable = snapshot.data!.isNotEmpty;
                             return hasTimetable
                                 ? ListView.builder(
@@ -112,7 +102,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                     itemBuilder: (context, index) {
                                       String key =
                                           snapshot.data!.keys.elementAt(index);
-                                      return ListTile(
+                                      return Card(
+                                        child: ListTile(
                                           title: Text(key.split('_')[1]),
                                           onTap: () {
                                             Navigator.push(
@@ -126,24 +117,29 @@ class _HomeScreenState extends State<HomeScreen> {
                                                 ),
                                               ),
                                             );
-                                            // Handle tap event, e.g. navigate to timetable details page
                                           },
                                           trailing: IconButton(
                                             onPressed: () {
                                               deleteTimetable(key);
                                               ScaffoldMessenger.of(context)
                                                   .showSnackBar(
-                                                SnackBar(
+                                                const SnackBar(
                                                   content:
                                                       Text('Timetable deleted'),
-                                                  duration: const Duration(
-                                                      seconds: 1),
+                                                  duration: Duration(
+                                                    seconds: 1,
+                                                  ),
                                                 ),
                                               );
                                               setState(() {});
                                             },
-                                            icon: const Icon(Icons.delete),
-                                          ));
+                                            icon: const Icon(
+                                              Icons.delete,
+                                              color: Colors.red,
+                                            ),
+                                          ),
+                                        ),
+                                      );
                                     },
                                   )
                                 : _buildNoTimetable();
@@ -154,61 +150,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     const Spacer(),
                   ],
                 ),
-                // hasTimetable ? _buildTimetable() : _buildNoTimetable(),
               ),
             ],
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildTimetable() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      // mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text('Timetable'),
-            IconButton(
-              onPressed: () {
-                Navigator.pushNamed(context, '/create_timetable');
-              },
-              icon: const Icon(Icons.add, size: 20),
-            ),
-          ],
-        ),
-        const Spacer(),
-        Center(
-          child: FutureBuilder(
-            future: getTimetableList(),
-            builder: (BuildContext context,
-                AsyncSnapshot<Map<String, List<MarineSchedule>>> snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return Center(child: CircularProgressIndicator());
-              } else if (snapshot.hasError) {
-                return Text('Error: ${snapshot.error}');
-              } else {
-                return ListView.builder(
-                  itemCount: snapshot.data!.keys.length,
-                  itemBuilder: (context, index) {
-                    String key = snapshot.data!.keys.elementAt(index);
-                    return ListTile(
-                      title: Text(key),
-                      onTap: () {
-                        // Handle tap event, e.g. navigate to timetable details page
-                      },
-                    );
-                  },
-                );
-              }
-            },
-          ),
-        ),
-        const Spacer(),
-      ],
     );
   }
 

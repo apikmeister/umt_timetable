@@ -1,15 +1,11 @@
-import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_timetable_view/flutter_timetable_view.dart';
-import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:umt_timetable/providers/new_timetable_provider.dart';
 import 'package:umt_timetable_parser/umt_timetable_parser.dart';
 
 class SavedTimetableScreen extends StatefulWidget {
-  final newEntries;
+  final dynamic newEntries;
   const SavedTimetableScreen({super.key, required this.newEntries});
 
   @override
@@ -17,44 +13,9 @@ class SavedTimetableScreen extends StatefulWidget {
 }
 
 class _SavedTimetableScreenState extends State<SavedTimetableScreen> {
-  // late final Future<List<LaneEvents>> timetableEvents;
   MarineSchedule? marineSchedule;
-  // late final newEntries;
 
   Future<List<LaneEvents>> fetchTimetableEvents() async {
-    // Initialize MarinerBase and fetch data
-    // var marinerBase = MarinerBase(
-    //     session: Provider.of<NewTimetableProvider>(context, listen: false)
-    //         .selectedSession!,
-    //     program: Provider.of<NewTimetableProvider>(context, listen: false)
-    //         .selectedProgram!);
-
-    // // Fetch the timetable JSON
-    // String year =
-    //     Provider.of<NewTimetableProvider>(context, listen: false).selectedYear!;
-    // String timetableJson = await marinerBase.getTimetable();
-
-    // Iterable l = jsonDecode(timetableJson);
-    // List<MarineSchedule> entries = List<MarineSchedule>.from(
-    //     l.map((model) => MarineSchedule.fromJson(model)));
-    // var unselectedGroups =
-    //     Provider.of<NewTimetableProvider>(context, listen: false)
-    //         .unselectedGroup;
-    // List<String> courses = entries
-    //     .where((entry) => entry.tahun == year && entry.elektif == false)
-    //     .map((entry) => entry.course)
-    //     .toSet()
-    //     .toList();
-    // Map<String, List<String>> groupsByCourse = {};
-    // for (String course in courses) {
-    //   List<String> groups = entries
-    //       .where((entry) => entry.course == course)
-    //       .map((entry) => entry.group)
-    //       .toSet()
-    //       .toList();
-    //   groupsByCourse[course] = groups;
-    // }
-
     Map<String, String> dayAbbreviations = {
       'AHAD': 'Sun',
       'ISNIN': 'Mon',
@@ -66,14 +27,6 @@ class _SavedTimetableScreenState extends State<SavedTimetableScreen> {
     };
 
     List<LaneEvents> events = [];
-    // var newEntries = entries
-    //     .where((entry) => entry.tahun == year && entry.elektif == false)
-    //     .toList();
-    // newEntries
-    //     .removeWhere((entry) => unselectedGroups![entry.course] == entry.group);
-    // unselectedGroups!.containsValue(entry.group) &&
-    // unselectedGroups.containsKey(entry.group));
-    // print(entries);
     Set<int> generatedColors = <int>{};
 
     Color generateUniqueColor() {
@@ -93,17 +46,7 @@ class _SavedTimetableScreenState extends State<SavedTimetableScreen> {
       return brightness > 0.5 ? Colors.black : Colors.white;
     }
 
-    // newEntriesJson = jsonEncode(newEntries.map((e) => e.toJson()).toList());
-
-    // print(newEntries);
-    // print(widget.newEntries);
-    String timetableKey = widget.newEntries.key;
     List<MarineSchedule> marineSchedules = widget.newEntries.value;
-// rest of your code
-    // for (var entry in widget.newEntries.entries) {
-    //   String timetableKey = entry.key;
-    //   List<MarineSchedule> marineSchedules = entry.value;
-    //   print(marineSchedules);
     for (var marineSchedule in marineSchedules) {
       String dayAbbreviation =
           dayAbbreviations[marineSchedule.hari] ?? marineSchedule.hari;
@@ -112,10 +55,9 @@ class _SavedTimetableScreenState extends State<SavedTimetableScreen> {
           LaneEvents(
             lane: Lane(
               name: dayAbbreviation,
-              textStyle: TextStyle(
+              textStyle: const TextStyle(
                 fontFamily: 'Inter',
               ),
-              // marineSchedule.hari
             ),
             events: [],
           ),
@@ -125,8 +67,6 @@ class _SavedTimetableScreenState extends State<SavedTimetableScreen> {
       Color foregroundColor = textColor(backgroundColor);
       events.last.events.add(
         TableEvent(
-          // padding: const EdgeInsets.all(8),
-          // margin: const EdgeInsets.all(4),
           backgroundColor: backgroundColor,
           textStyle: TextStyle(
             fontSize: 9,
@@ -144,21 +84,19 @@ class _SavedTimetableScreenState extends State<SavedTimetableScreen> {
           subtitle: marineSchedule.location,
         ),
       );
-      // }
     }
     return events;
   }
 
   @override
   Widget build(BuildContext context) {
-    // List<LaneEvents> savedTimetables = [];
     TimetableView timetableView;
 
     return Scaffold(
       appBar: AppBar(
         title: Text(
           '${widget.newEntries.key.split('_')[1].toUpperCase()}',
-          style: TextStyle(
+          style: const TextStyle(
             color: Colors.black,
             fontWeight: FontWeight.bold,
             letterSpacing: 1.3,
@@ -185,16 +123,12 @@ class _SavedTimetableScreenState extends State<SavedTimetableScreen> {
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             List<LaneEvents> newTimetables = snapshot.data as List<LaneEvents>;
-            // setState(() {
-            //   savedTimetables = [...savedTimetables, ...newTimetables];
-            // });
             return LayoutBuilder(
               builder: (context, constraints) {
                 timetableView = TimetableView(
                   timetableStyle: TimetableStyle(
                     startHour: 8,
                     endHour: 20,
-                    // laneWidth: 80,
                     laneWidth:
                         constraints.maxWidth / (newTimetables.length + .8),
                     laneHeight: 30,
@@ -216,7 +150,7 @@ class _SavedTimetableScreenState extends State<SavedTimetableScreen> {
         onPressed: () {
           Navigator.pushNamed(context, '/home');
         },
-        child: Icon(Icons.home),
+        child: const Icon(Icons.home),
       ),
     );
   }

@@ -39,6 +39,11 @@ class NewTimetableProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void resetSelectedSession() {
+    _selectedSession = null;
+    notifyListeners();
+  }
+
   // void setSelectedSemester(String semester) {
   //   selectedSemester = semester;
   //   notifyListeners();

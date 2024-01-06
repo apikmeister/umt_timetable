@@ -85,29 +85,36 @@ class _CreateTimetableState extends State<CreateTimetable> {
                     ),
                     const SizedBox(height: 10),
                     // children: [
-                    FutureBuilder(
-                      future: _semesterDropdown(),
-                      builder: (context, snapshot) {
-                        if (snapshot.hasData) {
-                          return snapshot.data!;
-                        } else if (snapshot.hasError) {
-                          return Text('${snapshot.error}');
-                        }
-                        return const Center(child: CircularProgressIndicator());
-                      },
-                    ),
+                    _semesterDropdown(),
+                    // FutureBuilder(
+                    //   future: _semesterDropdown(),
+                    //   builder: (context, snapshot) {
+                    //     if (snapshot.hasData) {
+                    //       return snapshot.data!;
+                    //     } else if (snapshot.hasError) {
+                    //       return Text('${snapshot.error}');
+                    //     }
+                    //     return const Center(child: CircularProgressIndicator());
+                    //   },
+                    // ),
                   ],
                 ),
               ],
             ),
-            // const SizedBox(height: 20),
             const Spacer(),
             ElevatedButton(
               onPressed: () {
                 var newTimetableProvider =
                     Provider.of<NewTimetableProvider>(context, listen: false);
-                if (newTimetableProvider.selectedSession == null ||
-                    selectedSemester == null) {
+                if (newTimetableProvider.selectedSession == null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        'Please select your study grade and semester',
+                      ),
+                      duration: Duration(seconds: 1),
+                    ),
+                  );
                   return;
                 }
                 Navigator.pushNamed(context, '/choose_program');
@@ -120,45 +127,95 @@ class _CreateTimetableState extends State<CreateTimetable> {
     );
   }
 
-  Future<Widget> _semesterDropdown() async {
-    if (selectedStudyGrade == null) {
-      return const SizedBox.shrink();
-    }
-    try {
-      String timetableJson = await getSemester();
+  Widget _semesterDropdown() {
+    return FutureBuilder(
+      future: () async {
+        if (selectedStudyGrade == null) {
+          return const SizedBox.shrink();
+        }
+        try {
+          String timetableJson = await getSemester();
 
-      Iterable l = jsonDecode(timetableJson);
+          Iterable l = jsonDecode(timetableJson);
 
-      List<Semester> entries = l
-          .map((model) => Semester.fromJson(model as Map<String, dynamic>))
-          .toList();
-      List<Semester> filteredEntries = entries
-          .where((entry) => entry.studyGrade == selectedStudyGrade)
-          .toList();
+          List<Semester> entries = l
+              .map((model) => Semester.fromJson(model as Map<String, dynamic>))
+              .toList();
+          List<Semester> filteredEntries = entries
+              .where((entry) => entry.studyGrade == selectedStudyGrade)
+              .toList();
 
-      List<DropdownMenuEntry> dropdownMenuItems =
-          filteredEntries.map((Semester entry) {
-        return DropdownMenuEntry(
-          label: entry.semesterName,
-          value: entry.semesterCode,
-        );
-      }).toList();
+          List<DropdownMenuEntry> dropdownMenuItems =
+              filteredEntries.map((Semester entry) {
+            return DropdownMenuEntry(
+              label: entry.semesterName,
+              value: entry.semesterCode,
+            );
+          }).toList();
 
-      return DropdownMenu(
-        dropdownMenuEntries: dropdownMenuItems,
-        hintText: "Semester",
-        onSelected: (value) {
-          Provider.of<NewTimetableProvider>(context, listen: false)
-              .setSelectedSession(value);
-          setState(() {
-            selectedSemester = value;
-          });
-        },
-      );
-    } catch (e) {
-      return Text('Error: ${e.toString()}');
-    }
+          return DropdownMenu(
+            dropdownMenuEntries: dropdownMenuItems,
+            hintText: "Semester",
+            onSelected: (value) {
+              Provider.of<NewTimetableProvider>(context, listen: false)
+                  .setSelectedSession(value);
+            },
+          );
+        } catch (e) {
+          return Text('Error: ${e.toString()}');
+        }
+      }(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return Text('Error: ${snapshot.error}');
+        } else {
+          return snapshot.data!;
+        }
+      },
+    );
   }
+
+  // Future<Widget> _semesterDropdown() async {
+  //   if (selectedStudyGrade == null) {
+  //     return const SizedBox.shrink();
+  //   }
+  //   try {
+  //     String timetableJson = await getSemester();
+
+  //     Iterable l = jsonDecode(timetableJson);
+
+  //     List<Semester> entries = l
+  //         .map((model) => Semester.fromJson(model as Map<String, dynamic>))
+  //         .toList();
+  //     List<Semester> filteredEntries = entries
+  //         .where((entry) => entry.studyGrade == selectedStudyGrade)
+  //         .toList();
+
+  //     List<DropdownMenuEntry> dropdownMenuItems =
+  //         filteredEntries.map((Semester entry) {
+  //       return DropdownMenuEntry(
+  //         label: entry.semesterName,
+  //         value: entry.semesterCode,
+  //       );
+  //     }).toList();
+
+  //     return DropdownMenu(
+  //       dropdownMenuEntries: dropdownMenuItems,
+  //       hintText: "Semester",
+  //       onSelected: (value) {
+  //         Provider.of<NewTimetableProvider>(context, listen: false)
+  //             .setSelectedSession(value);
+  //         setState(() {
+  //           selectedSemester = value;
+  //         });
+  //       },
+  //     );
+  //   } catch (e) {
+  //     return Text('Error: ${e.toString()}');
+  //   }
+  // }
 
   Future<Widget> _studyGradeDropdown() async {
     try {
@@ -186,6 +243,8 @@ class _CreateTimetableState extends State<CreateTimetable> {
         dropdownMenuEntries: dropdownMenuItems,
         hintText: "Study Grade",
         onSelected: (value) {
+          Provider.of<NewTimetableProvider>(context, listen: false)
+              .resetSelectedSession();
           setState(() {
             selectedStudyGrade = value;
             selectedSemester = null;

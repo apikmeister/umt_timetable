@@ -18,7 +18,7 @@ class TimetableScreen extends StatefulWidget {
 class _TimetableScreenState extends State<TimetableScreen> {
   late final Future<List<LaneEvents>> timetableEvents;
   MarineSchedule? marineSchedule;
-  late final newEntriesJson;
+  late final dynamic newEntriesJson;
 
   Future<List<LaneEvents>> fetchTimetableEvents() async {
     // Initialize MarinerBase and fetch data
@@ -70,9 +70,6 @@ class _TimetableScreenState extends State<TimetableScreen> {
         .toList();
     newEntries
         .removeWhere((entry) => unselectedGroups![entry.course] == entry.group);
-    // unselectedGroups!.containsValue(entry.group) &&
-    // unselectedGroups.containsKey(entry.group));
-    // print(entries);
     Set<int> generatedColors = <int>{};
 
     Color generateUniqueColor() {
@@ -94,7 +91,6 @@ class _TimetableScreenState extends State<TimetableScreen> {
 
     newEntriesJson = jsonEncode(newEntries.map((e) => e.toJson()).toList());
 
-    print(newEntries);
     for (var entry in newEntries) {
       String dayAbbreviation = dayAbbreviations[entry.hari] ?? entry.hari;
       if (events.isEmpty || events.last.lane.name != dayAbbreviation) {
@@ -102,10 +98,9 @@ class _TimetableScreenState extends State<TimetableScreen> {
           LaneEvents(
             lane: Lane(
               name: dayAbbreviation,
-              textStyle: TextStyle(
+              textStyle: const TextStyle(
                 fontFamily: 'Inter',
               ),
-              // entry.hari
             ),
             events: [],
           ),
@@ -115,8 +110,6 @@ class _TimetableScreenState extends State<TimetableScreen> {
       Color foregroundColor = textColor(backgroundColor);
       events.last.events.add(
         TableEvent(
-          // padding: const EdgeInsets.all(8),
-          // margin: const EdgeInsets.all(4),
           backgroundColor: backgroundColor,
           textStyle: TextStyle(
             fontSize: 9,
@@ -135,13 +128,11 @@ class _TimetableScreenState extends State<TimetableScreen> {
         ),
       );
     }
-    print(events);
     return events;
   }
 
   @override
   Widget build(BuildContext context) {
-    // List<LaneEvents> savedTimetables = [];
     TimetableView timetableView;
 
     return Scaffold(
@@ -150,13 +141,13 @@ class _TimetableScreenState extends State<TimetableScreen> {
           Provider.of<NewTimetableProvider>(context, listen: false)
               .timetableName!
               .toUpperCase(),
-          style: TextStyle(
+          style: const TextStyle(
             color: Colors.black,
             fontWeight: FontWeight.bold,
             letterSpacing: 1.3,
           ),
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         toolbarHeight: 30,
         actions: <Widget>[
@@ -177,16 +168,12 @@ class _TimetableScreenState extends State<TimetableScreen> {
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             List<LaneEvents> newTimetables = snapshot.data as List<LaneEvents>;
-            // setState(() {
-            //   savedTimetables = [...savedTimetables, ...newTimetables];
-            // });
             return LayoutBuilder(
               builder: (context, constraints) {
                 timetableView = TimetableView(
                   timetableStyle: TimetableStyle(
                     startHour: 8,
                     endHour: 20,
-                    // laneWidth: 80,
                     laneWidth:
                         constraints.maxWidth / (newTimetables.length + .8),
                     laneHeight: 30,
@@ -206,16 +193,13 @@ class _TimetableScreenState extends State<TimetableScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          // print(newEntriesJson);
           SharedPreferences prefs = await SharedPreferences.getInstance();
           await prefs.setString(
-              'timetable_' +
-                  Provider.of<NewTimetableProvider>(context, listen: false)
-                      .timetableName!,
+              'timetable_${Provider.of<NewTimetableProvider>(context, listen: false).timetableName!}',
               newEntriesJson);
           Navigator.pushNamed(context, '/home');
         },
-        child: Icon(Icons.save),
+        child: const Icon(Icons.save),
       ),
     );
   }
