@@ -101,15 +101,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             ],
                           ),
                         ),
-                        // Visibility(
-                        //   visible: currPage == items.length - 1,
-                        //   child: ElevatedButton(
-                        //     onPressed: () {
-                        //       Navigator.pushNamed(context, '/home');
-                        //     },
-                        //     child: Text('Get Started'),
-                        //   ),
-                        // ),
                       ],
                     ),
                   );
@@ -124,30 +115,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 children: _buildIndicator(),
               ),
             ),
-            // Container(
-            //   child: Row(
-            //     mainAxisAlignment: MainAxisAlignment.center,
-            //     children: [
-            //       for (int i = 0; i < items.length; i++)
-            //         if (i == currPage)
-            //           const Padding(
-            //             padding: EdgeInsets.all(5),
-            //             child: CircleAvatar(
-            //               radius: 5,
-            //               backgroundColor: Colors.black,
-            //             ),
-            //           )
-            //         else
-            //           const Padding(
-            //             padding: EdgeInsets.all(5),
-            //             child: CircleAvatar(
-            //               radius: 5,
-            //               backgroundColor: Colors.grey,
-            //             ),
-            //           )
-            //     ],
-            //   ),
-            // ),
           ],
         ),
       ),

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 class NewTimetableProvider extends ChangeNotifier {
-  // String selectedSemester = '';
   String? _selectedSession;
   String? _selectedProgram;
   String? _selectedYear;
@@ -43,9 +42,4 @@ class NewTimetableProvider extends ChangeNotifier {
     _selectedSession = null;
     notifyListeners();
   }
-
-  // void setSelectedSemester(String semester) {
-  //   selectedSemester = semester;
-  //   notifyListeners();
-  // }
 }

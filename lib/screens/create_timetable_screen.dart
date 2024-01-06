@@ -84,19 +84,7 @@ class _CreateTimetableState extends State<CreateTimetable> {
                       'Semester',
                     ),
                     const SizedBox(height: 10),
-                    // children: [
                     _semesterDropdown(),
-                    // FutureBuilder(
-                    //   future: _semesterDropdown(),
-                    //   builder: (context, snapshot) {
-                    //     if (snapshot.hasData) {
-                    //       return snapshot.data!;
-                    //     } else if (snapshot.hasError) {
-                    //       return Text('${snapshot.error}');
-                    //     }
-                    //     return const Center(child: CircularProgressIndicator());
-                    //   },
-                    // ),
                   ],
                 ),
               ],
@@ -176,46 +164,6 @@ class _CreateTimetableState extends State<CreateTimetable> {
       },
     );
   }
-
-  // Future<Widget> _semesterDropdown() async {
-  //   if (selectedStudyGrade == null) {
-  //     return const SizedBox.shrink();
-  //   }
-  //   try {
-  //     String timetableJson = await getSemester();
-
-  //     Iterable l = jsonDecode(timetableJson);
-
-  //     List<Semester> entries = l
-  //         .map((model) => Semester.fromJson(model as Map<String, dynamic>))
-  //         .toList();
-  //     List<Semester> filteredEntries = entries
-  //         .where((entry) => entry.studyGrade == selectedStudyGrade)
-  //         .toList();
-
-  //     List<DropdownMenuEntry> dropdownMenuItems =
-  //         filteredEntries.map((Semester entry) {
-  //       return DropdownMenuEntry(
-  //         label: entry.semesterName,
-  //         value: entry.semesterCode,
-  //       );
-  //     }).toList();
-
-  //     return DropdownMenu(
-  //       dropdownMenuEntries: dropdownMenuItems,
-  //       hintText: "Semester",
-  //       onSelected: (value) {
-  //         Provider.of<NewTimetableProvider>(context, listen: false)
-  //             .setSelectedSession(value);
-  //         setState(() {
-  //           selectedSemester = value;
-  //         });
-  //       },
-  //     );
-  //   } catch (e) {
-  //     return Text('Error: ${e.toString()}');
-  //   }
-  // }
 
   Future<Widget> _studyGradeDropdown() async {
     try {
