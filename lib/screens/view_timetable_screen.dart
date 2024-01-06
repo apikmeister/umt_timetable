@@ -18,7 +18,7 @@ class TimetableScreen extends StatefulWidget {
 class _TimetableScreenState extends State<TimetableScreen> {
   late final Future<List<LaneEvents>> timetableEvents;
   MarineSchedule? marineSchedule;
-  late final newEntriesJson;
+  // late final newEntriesJson;
 
   Future<List<LaneEvents>> fetchTimetableEvents() async {
     // Initialize MarinerBase and fetch data
@@ -92,7 +92,7 @@ class _TimetableScreenState extends State<TimetableScreen> {
       return brightness > 0.5 ? Colors.black : Colors.white;
     }
 
-    newEntriesJson = jsonEncode(newEntries.map((e) => e.toJson()).toList());
+    // newEntriesJson = jsonEncode(newEntries.map((e) => e.toJson()).toList());
 
     print(newEntries);
     for (var entry in newEntries) {
@@ -135,7 +135,7 @@ class _TimetableScreenState extends State<TimetableScreen> {
         ),
       );
     }
-    print(events);
+    // print(events);
     return events;
   }
 
@@ -145,76 +145,103 @@ class _TimetableScreenState extends State<TimetableScreen> {
     TimetableView timetableView;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Timetable',
-          style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 1.3,
-          ),
-        ),
-        backgroundColor: Colors.white,
-        elevation: 0,
-        toolbarHeight: 30,
-        actions: <Widget>[
-          IconButton(
-            onPressed: () {},
-            icon: const RotatedBox(
-              quarterTurns: 1,
-              child: Icon(
-                Icons.tune,
-                color: Colors.black,
-              ),
+        appBar: AppBar(
+          title: const Text(
+            'Timetable',
+            style: TextStyle(
+              color: Colors.black,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.3,
             ),
           ),
-        ],
-      ),
-      body: FutureBuilder(
-        future: fetchTimetableEvents(),
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            List<LaneEvents> newTimetables = snapshot.data as List<LaneEvents>;
-            // setState(() {
-            //   savedTimetables = [...savedTimetables, ...newTimetables];
-            // });
-            return LayoutBuilder(
-              builder: (context, constraints) {
-                timetableView = TimetableView(
-                  timetableStyle: TimetableStyle(
-                    startHour: 8,
-                    endHour: 20,
-                    // laneWidth: 80,
-                    laneWidth:
-                        constraints.maxWidth / (newTimetables.length + .8),
-                    laneHeight: 30,
-                    timeItemTextColor: Colors.black,
-                    timeItemWidth: 40,
-                  ),
-                  laneEventsList: newTimetables,
-                );
-                return timetableView;
-              },
+          backgroundColor: Colors.white,
+          elevation: 0,
+          toolbarHeight: 30,
+          actions: <Widget>[
+            IconButton(
+              onPressed: () {},
+              icon: const RotatedBox(
+                quarterTurns: 1,
+                child: Icon(
+                  Icons.tune,
+                  color: Colors.black,
+                ),
+              ),
+            ),
+          ],
+        ),
+        body: FutureBuilder(
+          future: fetchTimetableEvents(),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              List<LaneEvents> newTimetables = snapshot.data!;
+              // Map<String, LaneEvents> newTimetablesMap = {'test': newTimetables};
+
+              // setState(() {
+              //   savedTimetables = [...savedTimetables, ...newTimetables];
+              // });
+              return LayoutBuilder(
+                builder: (context, constraints) {
+                  timetableView = TimetableView(
+                    timetableStyle: TimetableStyle(
+                      startHour: 8,
+                      endHour: 20,
+                      // laneWidth: 80,
+                      laneWidth:
+                          constraints.maxWidth / (newTimetables.length + .8),
+                      laneHeight: 30,
+                      timeItemTextColor: Colors.black,
+                      timeItemWidth: 40,
+                    ),
+                    laneEventsList: newTimetables,
+                  );
+                  return timetableView;
+                },
+              );
+            } else if (snapshot.hasError) {
+              return Text('${snapshot.error}');
+            }
+            return const Center(child: CircularProgressIndicator());
+          },
+        ),
+        floatingActionButton: Consumer<NewTimetableProvider>(
+          builder: (context, provider, child) {
+            return FloatingActionButton(
+              onPressed: provider.loading
+                  ? null
+                  : () async {
+                      provider.setLoading(true);
+                      provider.addTimetableEvent(provider.timetableName!,
+                          await fetchTimetableEvents());
+                      provider.setLoading(false);
+                      Navigator.pushNamed(context, '/home');
+                    },
+              child: provider.loading
+                  ? CircularProgressIndicator(
+                      color: Colors.white,
+                    )
+                  : Icon(Icons.save),
             );
-          } else if (snapshot.hasError) {
-            return Text('${snapshot.error}');
-          }
-          return const Center(child: CircularProgressIndicator());
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          // print(newEntriesJson);
-          SharedPreferences prefs = await SharedPreferences.getInstance();
-          await prefs.setString(
-              'timetable_' +
-                  Provider.of<NewTimetableProvider>(context, listen: false)
-                      .timetableName!,
-              newEntriesJson);
-          Navigator.pushNamed(context, '/home');
-        },
-        child: Icon(Icons.save),
-      ),
-    );
+          },
+        )
+        // FloatingActionButton(
+        //   onPressed: () async {
+        //     Provider.of<NewTimetableProvider>(context, listen: false)
+        //         .addTimetableEvent(
+        //             Provider.of<NewTimetableProvider>(context, listen: false)
+        //                 .timetableName!,
+        //             await fetchTimetableEvents());
+        //     // print(newEntriesJson);
+        //     // SharedPreferences prefs = await SharedPreferences.getInstance();
+        //     // await prefs.setString(
+        //     //     'timetable_' +
+        //     //         Provider.of<NewTimetableProvider>(context, listen: false)
+        //     //             .timetableName!,
+        //     //     newEntriesJson);
+        //     Navigator.pushNamed(context, '/home');
+        //   },
+        //   child: Icon(Icons.save),
+        // ),
+        );
   }
 }

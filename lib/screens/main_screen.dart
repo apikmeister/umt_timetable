@@ -3,7 +3,9 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:umt_timetable/providers/new_timetable_provider.dart';
 import 'package:umt_timetable/screens/saved_view_timetable_screen.dart';
 import 'package:umt_timetable_parser/umt_timetable_parser.dart';
 
@@ -42,6 +44,11 @@ class _HomeScreenState extends State<HomeScreen> {
     });
     // await prefs.clear(); //FIXME:
     return savedTimetables;
+  }
+
+  Future<void> deleteTimetable(String key) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove(key);
   }
 
   // @override
@@ -87,51 +94,105 @@ class _HomeScreenState extends State<HomeScreen> {
                       ],
                     ),
                     // Spacer(),
-                    Expanded(
-                      child: FutureBuilder(
-                        future: getTimetableList(),
-                        builder: (BuildContext context,
-                            AsyncSnapshot<Map<String, List<MarineSchedule>>>
-                                snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return Center(child: CircularProgressIndicator());
-                          } else if (snapshot.hasError) {
-                            return Text('Error: ${snapshot.error}');
-                          } else {
-                            print(snapshot.data);
-                            hasTimetable = snapshot.data!.isNotEmpty;
-                            return hasTimetable
-                                ? ListView.builder(
-                                    itemCount: snapshot.data!.keys.length,
-                                    itemBuilder: (context, index) {
-                                      String key =
-                                          snapshot.data!.keys.elementAt(index);
-                                      return ListTile(
-                                        title: Text(key.split('_')[1]),
-                                        onTap: () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) =>
-                                                  SavedTimetableScreen(
-                                                newEntries: snapshot
-                                                    .data!.entries
-                                                    .elementAt(index),
-                                              ),
-                                            ),
-                                          );
-                                          // Handle tap event, e.g. navigate to timetable details page
-                                        },
-                                        trailing: Icon(Icons.arrow_forward_ios),
+                    Expanded(child: Consumer<NewTimetableProvider>(
+                      builder: (context, provider, child) {
+                        return (provider.timetableEvents == null ||
+                                provider.timetableEvents!.isEmpty)
+                            ? _buildNoTimetable()
+                            : ListView.builder(
+                                itemCount:
+                                    provider.timetableEvents!.keys.length,
+                                itemBuilder: (context, index) {
+                                  String key = provider.timetableEvents!.keys
+                                      .elementAt(index);
+                                  return ListTile(
+                                    title: Text(key),
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              SavedTimetableScreen(
+                                            newEntries: provider
+                                                .timetableEvents!.entries
+                                                .elementAt(index),
+                                          ),
+                                        ),
                                       );
+                                      // Handle tap event, e.g. navigate to timetable details page
                                     },
-                                  )
-                                : _buildNoTimetable();
-                          }
-                        },
-                      ),
-                    ),
+                                    trailing: IconButton(
+                                      onPressed: () async {
+                                        provider.deleteTimetableEvent(key);
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                                'Timetable deleted successfully'),
+                                            duration: const Duration(
+                                                milliseconds: 1000),
+                                          ),
+                                        );
+                                      },
+                                      icon: const Icon(Icons.delete),
+                                    ),
+                                    // Icon(Icons.arrow_forward_ios),
+                                  );
+                                },
+                              );
+                      },
+                    )
+                        // FutureBuilder(
+                        //   future: getTimetableList(),
+                        //   builder: (BuildContext context,
+                        //       AsyncSnapshot<Map<String, List<MarineSchedule>>>
+                        //           snapshot) {
+                        //     if (snapshot.connectionState ==
+                        //         ConnectionState.waiting) {
+                        //       return Center(child: CircularProgressIndicator());
+                        //     } else if (snapshot.hasError) {
+                        //       return Text('Error: ${snapshot.error}');
+                        //     } else {
+                        //       print(snapshot.data);
+                        //       hasTimetable = snapshot.data!.isNotEmpty;
+                        //       return hasTimetable
+                        //           ? ListView.builder(
+                        //               itemCount: snapshot.data!.keys.length,
+                        //               itemBuilder: (context, index) {
+                        //                 String key =
+                        //                     snapshot.data!.keys.elementAt(index);
+                        //                 return ListTile(
+                        //                   title: Text(key.split('_')[1]),
+                        //                   onTap: () {
+                        //                     Navigator.push(
+                        //                       context,
+                        //                       MaterialPageRoute(
+                        //                         builder: (context) =>
+                        //                             SavedTimetableScreen(
+                        //                           newEntries: snapshot
+                        //                               .data!.entries
+                        //                               .elementAt(index),
+                        //                         ),
+                        //                       ),
+                        //                     );
+                        //                     // Handle tap event, e.g. navigate to timetable details page
+                        //                   },
+                        //                   trailing: IconButton(
+                        //                     onPressed: () async {
+                        //                       await deleteTimetable(key);
+                        //                       setState(() {});
+                        //                     },
+                        //                     icon: const Icon(Icons.delete),
+                        //                   ),
+                        //                   // Icon(Icons.arrow_forward_ios),
+                        //                 );
+                        //               },
+                        //             )
+                        //           : _buildNoTimetable();
+                        //     }
+                        //   },
+                        // ),
+                        ),
                     const Spacer(),
                   ],
                 ),

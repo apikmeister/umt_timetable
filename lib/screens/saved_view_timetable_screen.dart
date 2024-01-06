@@ -100,9 +100,10 @@ class _SavedTimetableScreenState extends State<SavedTimetableScreen> {
     for (var entry in widget.newEntries) {
       String timetableKey = entry.key;
       List<MarineSchedule> marineSchedules = entry.value;
-      print(marineSchedules);
+      // print(marineSchedules);
       for (var marineSchedule in marineSchedules) {
-        String dayAbbreviation = dayAbbreviations[marineSchedule.hari] ?? marineSchedule.hari;
+        String dayAbbreviation =
+            dayAbbreviations[marineSchedule.hari] ?? marineSchedule.hari;
         if (events.isEmpty || events.last.lane.name != dayAbbreviation) {
           events.add(
             LaneEvents(
@@ -177,38 +178,56 @@ class _SavedTimetableScreenState extends State<SavedTimetableScreen> {
           ),
         ],
       ),
-      body: FutureBuilder(
-        future: fetchTimetableEvents(),
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            List<LaneEvents> newTimetables = snapshot.data as List<LaneEvents>;
-            // setState(() {
-            //   savedTimetables = [...savedTimetables, ...newTimetables];
-            // });
-            return LayoutBuilder(
-              builder: (context, constraints) {
-                timetableView = TimetableView(
-                  timetableStyle: TimetableStyle(
-                    startHour: 8,
-                    endHour: 20,
-                    // laneWidth: 80,
-                    laneWidth:
-                        constraints.maxWidth / (newTimetables.length + .8),
-                    laneHeight: 30,
-                    timeItemTextColor: Colors.black,
-                    timeItemWidth: 40,
-                  ),
-                  laneEventsList: newTimetables,
-                );
-                return timetableView;
-              },
-            );
-          } else if (snapshot.hasError) {
-            return Text('${snapshot.error}');
-          }
-          return const Center(child: CircularProgressIndicator());
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          timetableView = TimetableView(
+            timetableStyle: TimetableStyle(
+              startHour: 8,
+              endHour: 20,
+              // laneWidth: 80,
+              laneWidth:
+                  constraints.maxWidth / (widget.newEntries.value.length + .8),
+              laneHeight: 30,
+              timeItemTextColor: Colors.black,
+              timeItemWidth: 40,
+            ),
+            laneEventsList: widget.newEntries.value,
+          );
+          return timetableView;
         },
       ),
+      // FutureBuilder(
+      //   future: fetchTimetableEvents(),
+      //   builder: (context, snapshot) {
+      //     if (snapshot.hasData) {
+      //       List<LaneEvents> newTimetables = snapshot.data as List<LaneEvents>;
+      //       // setState(() {
+      //       //   savedTimetables = [...savedTimetables, ...newTimetables];
+      //       // });
+      //       return LayoutBuilder(
+      //         builder: (context, constraints) {
+      //           timetableView = TimetableView(
+      //             timetableStyle: TimetableStyle(
+      //               startHour: 8,
+      //               endHour: 20,
+      //               // laneWidth: 80,
+      //               laneWidth:
+      //                   constraints.maxWidth / (newTimetables.length + .8),
+      //               laneHeight: 30,
+      //               timeItemTextColor: Colors.black,
+      //               timeItemWidth: 40,
+      //             ),
+      //             laneEventsList: newTimetables,
+      //           );
+      //           return timetableView;
+      //         },
+      //       );
+      //     } else if (snapshot.hasError) {
+      //       return Text('${snapshot.error}');
+      //     }
+      //     return const Center(child: CircularProgressIndicator());
+      //   },
+      // ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.pushNamed(context, '/home');
