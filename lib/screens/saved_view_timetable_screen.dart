@@ -8,51 +8,52 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:umt_timetable/providers/new_timetable_provider.dart';
 import 'package:umt_timetable_parser/umt_timetable_parser.dart';
 
-class TimetableScreen extends StatefulWidget {
-  const TimetableScreen({super.key});
+class SavedTimetableScreen extends StatefulWidget {
+  final newEntries;
+  const SavedTimetableScreen({super.key, required this.newEntries});
 
   @override
-  State<TimetableScreen> createState() => _TimetableScreenState();
+  State<SavedTimetableScreen> createState() => _SavedTimetableScreenState();
 }
 
-class _TimetableScreenState extends State<TimetableScreen> {
+class _SavedTimetableScreenState extends State<SavedTimetableScreen> {
   late final Future<List<LaneEvents>> timetableEvents;
   MarineSchedule? marineSchedule;
-  late final newEntriesJson;
+  // late final newEntries;
 
   Future<List<LaneEvents>> fetchTimetableEvents() async {
     // Initialize MarinerBase and fetch data
-    var marinerBase = MarinerBase(
-        session: Provider.of<NewTimetableProvider>(context, listen: false)
-            .selectedSession!,
-        program: Provider.of<NewTimetableProvider>(context, listen: false)
-            .selectedProgram!);
+    // var marinerBase = MarinerBase(
+    //     session: Provider.of<NewTimetableProvider>(context, listen: false)
+    //         .selectedSession!,
+    //     program: Provider.of<NewTimetableProvider>(context, listen: false)
+    //         .selectedProgram!);
 
-    // Fetch the timetable JSON
-    String year =
-        Provider.of<NewTimetableProvider>(context, listen: false).selectedYear!;
-    String timetableJson = await marinerBase.getTimetable();
+    // // Fetch the timetable JSON
+    // String year =
+    //     Provider.of<NewTimetableProvider>(context, listen: false).selectedYear!;
+    // String timetableJson = await marinerBase.getTimetable();
 
-    Iterable l = jsonDecode(timetableJson);
-    List<MarineSchedule> entries = List<MarineSchedule>.from(
-        l.map((model) => MarineSchedule.fromJson(model)));
-    var unselectedGroups =
-        Provider.of<NewTimetableProvider>(context, listen: false)
-            .unselectedGroup;
-    List<String> courses = entries
-        .where((entry) => entry.tahun == year && entry.elektif == false)
-        .map((entry) => entry.course)
-        .toSet()
-        .toList();
-    Map<String, List<String>> groupsByCourse = {};
-    for (String course in courses) {
-      List<String> groups = entries
-          .where((entry) => entry.course == course)
-          .map((entry) => entry.group)
-          .toSet()
-          .toList();
-      groupsByCourse[course] = groups;
-    }
+    // Iterable l = jsonDecode(timetableJson);
+    // List<MarineSchedule> entries = List<MarineSchedule>.from(
+    //     l.map((model) => MarineSchedule.fromJson(model)));
+    // var unselectedGroups =
+    //     Provider.of<NewTimetableProvider>(context, listen: false)
+    //         .unselectedGroup;
+    // List<String> courses = entries
+    //     .where((entry) => entry.tahun == year && entry.elektif == false)
+    //     .map((entry) => entry.course)
+    //     .toSet()
+    //     .toList();
+    // Map<String, List<String>> groupsByCourse = {};
+    // for (String course in courses) {
+    //   List<String> groups = entries
+    //       .where((entry) => entry.course == course)
+    //       .map((entry) => entry.group)
+    //       .toSet()
+    //       .toList();
+    //   groupsByCourse[course] = groups;
+    // }
 
     Map<String, String> dayAbbreviations = {
       'AHAD': 'Sun',
@@ -65,11 +66,11 @@ class _TimetableScreenState extends State<TimetableScreen> {
     };
 
     List<LaneEvents> events = [];
-    var newEntries = entries
-        .where((entry) => entry.tahun == year && entry.elektif == false)
-        .toList();
-    newEntries
-        .removeWhere((entry) => unselectedGroups![entry.course] == entry.group);
+    // var newEntries = entries
+    //     .where((entry) => entry.tahun == year && entry.elektif == false)
+    //     .toList();
+    // newEntries
+    //     .removeWhere((entry) => unselectedGroups![entry.course] == entry.group);
     // unselectedGroups!.containsValue(entry.group) &&
     // unselectedGroups.containsKey(entry.group));
     // print(entries);
@@ -92,48 +93,54 @@ class _TimetableScreenState extends State<TimetableScreen> {
       return brightness > 0.5 ? Colors.black : Colors.white;
     }
 
-    newEntriesJson = jsonEncode(newEntries.map((e) => e.toJson()).toList());
+    // newEntriesJson = jsonEncode(newEntries.map((e) => e.toJson()).toList());
 
-    print(newEntries);
-    for (var entry in newEntries) {
-      String dayAbbreviation = dayAbbreviations[entry.hari] ?? entry.hari;
-      if (events.isEmpty || events.last.lane.name != dayAbbreviation) {
-        events.add(
-          LaneEvents(
-            lane: Lane(
-              name: dayAbbreviation,
-              textStyle: TextStyle(
-                fontFamily: 'Inter',
+    // print(newEntries);
+    // print(widget.newEntries);
+    for (var entry in widget.newEntries) {
+      String timetableKey = entry.key;
+      List<MarineSchedule> marineSchedules = entry.value;
+      print(marineSchedules);
+      for (var marineSchedule in marineSchedules) {
+        String dayAbbreviation = dayAbbreviations[marineSchedule.hari] ?? marineSchedule.hari;
+        if (events.isEmpty || events.last.lane.name != dayAbbreviation) {
+          events.add(
+            LaneEvents(
+              lane: Lane(
+                name: dayAbbreviation,
+                textStyle: TextStyle(
+                  fontFamily: 'Inter',
+                ),
+                // marineSchedule.hari
               ),
-              // entry.hari
+              events: [],
             ),
-            events: [],
+          );
+        }
+        Color backgroundColor = generateUniqueColor();
+        Color foregroundColor = textColor(backgroundColor);
+        events.last.events.add(
+          TableEvent(
+            // padding: const EdgeInsets.all(8),
+            // margin: const EdgeInsets.all(4),
+            backgroundColor: backgroundColor,
+            textStyle: TextStyle(
+              fontSize: 9,
+              color: foregroundColor,
+            ),
+            title: marineSchedule.course,
+            start: TableEventTime(
+              hour: marineSchedule.startTime,
+              minute: 0,
+            ),
+            end: TableEventTime(
+              hour: marineSchedule.endTime,
+              minute: 0,
+            ),
+            subtitle: marineSchedule.location,
           ),
         );
       }
-      Color backgroundColor = generateUniqueColor();
-      Color foregroundColor = textColor(backgroundColor);
-      events.last.events.add(
-        TableEvent(
-          // padding: const EdgeInsets.all(8),
-          // margin: const EdgeInsets.all(4),
-          backgroundColor: backgroundColor,
-          textStyle: TextStyle(
-            fontSize: 9,
-            color: foregroundColor,
-          ),
-          title: entry.course,
-          start: TableEventTime(
-            hour: entry.startTime,
-            minute: 0,
-          ),
-          end: TableEventTime(
-            hour: entry.endTime,
-            minute: 0,
-          ),
-          subtitle: entry.location,
-        ),
-      );
     }
     print(events);
     return events;
@@ -203,17 +210,10 @@ class _TimetableScreenState extends State<TimetableScreen> {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          // print(newEntriesJson);
-          SharedPreferences prefs = await SharedPreferences.getInstance();
-          await prefs.setString(
-              'timetable_' +
-                  Provider.of<NewTimetableProvider>(context, listen: false)
-                      .timetableName!,
-              newEntriesJson);
+        onPressed: () {
           Navigator.pushNamed(context, '/home');
         },
-        child: Icon(Icons.save),
+        child: Icon(Icons.home),
       ),
     );
   }

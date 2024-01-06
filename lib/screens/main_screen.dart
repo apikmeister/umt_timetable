@@ -1,6 +1,11 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:umt_timetable/screens/saved_view_timetable_screen.dart';
+import 'package:umt_timetable_parser/umt_timetable_parser.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -19,6 +24,31 @@ class _HomeScreenState extends State<HomeScreen> {
     'Thursday',
     'Friday'
   ];
+
+  Future<Map<String, List<MarineSchedule>>> getTimetableList() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    Map<String, List<MarineSchedule>> savedTimetables = {};
+    prefs.getKeys().forEach((key) {
+      if (key.startsWith('timetable_')) {
+        String? timetableJson = prefs.getString(key);
+        if (timetableJson != null) {
+          // hasTimetable = true;
+          List<MarineSchedule> timetable = (jsonDecode(timetableJson) as List)
+              .map((e) => MarineSchedule.fromJson(e))
+              .toList();
+          savedTimetables[key] = timetable;
+        }
+      }
+    });
+    // await prefs.clear(); //FIXME:
+    return savedTimetables;
+  }
+
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   getTimetableList();
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +71,71 @@ class _HomeScreenState extends State<HomeScreen> {
                 thickness: 1,
               ),
               Expanded(
-                child: hasTimetable ? _buildTimetable() : _buildNoTimetable(),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text('Create New Timetable'),
+                        IconButton(
+                          onPressed: () {
+                            Navigator.pushNamed(context, '/create_timetable');
+                          },
+                          icon: const Icon(Icons.add, size: 20),
+                        ),
+                      ],
+                    ),
+                    // Spacer(),
+                    Expanded(
+                      child: FutureBuilder(
+                        future: getTimetableList(),
+                        builder: (BuildContext context,
+                            AsyncSnapshot<Map<String, List<MarineSchedule>>>
+                                snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return Center(child: CircularProgressIndicator());
+                          } else if (snapshot.hasError) {
+                            return Text('Error: ${snapshot.error}');
+                          } else {
+                            print(snapshot.data);
+                            hasTimetable = snapshot.data!.isNotEmpty;
+                            return hasTimetable
+                                ? ListView.builder(
+                                    itemCount: snapshot.data!.keys.length,
+                                    itemBuilder: (context, index) {
+                                      String key =
+                                          snapshot.data!.keys.elementAt(index);
+                                      return ListTile(
+                                        title: Text(key.split('_')[1]),
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  SavedTimetableScreen(
+                                                newEntries: snapshot
+                                                    .data!.entries
+                                                    .elementAt(index),
+                                              ),
+                                            ),
+                                          );
+                                          // Handle tap event, e.g. navigate to timetable details page
+                                        },
+                                        trailing: Icon(Icons.arrow_forward_ios),
+                                      );
+                                    },
+                                  )
+                                : _buildNoTimetable();
+                          }
+                        },
+                      ),
+                    ),
+                    const Spacer(),
+                  ],
+                ),
+                // hasTimetable ? _buildTimetable() : _buildNoTimetable(),
               ),
             ],
           ),
@@ -69,12 +163,28 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         const Spacer(),
         Center(
-          child: ListView.builder(
-            itemCount: timetableList.length,
-            itemBuilder: (context, index) {
-              return ListTile(
-                title: Text(timetableList[index]),
-              );
+          child: FutureBuilder(
+            future: getTimetableList(),
+            builder: (BuildContext context,
+                AsyncSnapshot<Map<String, List<MarineSchedule>>> snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(child: CircularProgressIndicator());
+              } else if (snapshot.hasError) {
+                return Text('Error: ${snapshot.error}');
+              } else {
+                return ListView.builder(
+                  itemCount: snapshot.data!.keys.length,
+                  itemBuilder: (context, index) {
+                    String key = snapshot.data!.keys.elementAt(index);
+                    return ListTile(
+                      title: Text(key),
+                      onTap: () {
+                        // Handle tap event, e.g. navigate to timetable details page
+                      },
+                    );
+                  },
+                );
+              }
             },
           ),
         ),
@@ -84,41 +194,24 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildNoTimetable() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text('Create New Timetable'),
-            IconButton(
-              onPressed: () {
-                Navigator.pushNamed(context, '/create_timetable');
-              },
-              icon: const Icon(Icons.add, size: 20),
+    return Center(
+      child: Column(
+        children: [
+          Expanded(
+            child: Lottie.asset(
+              'assets/lottie/notFoundAnim.json',
+              animate: false,
             ),
-          ],
-        ),
-        // Spacer(),
-        Center(
-          child: Column(
-            children: [
-              Lottie.asset(
-                'assets/lottie/notFoundAnim.json',
-                animate: false,
-              ),
-              Text(
-                'No timetable found',
-                style: GoogleFonts.inter(
-                  fontStyle: FontStyle.italic,
-                  color: Colors.grey,
-                ),
-              ),
-            ],
           ),
-        ),
-        const Spacer(),
-      ],
+          Text(
+            'No timetable found',
+            style: GoogleFonts.inter(
+              fontStyle: FontStyle.italic,
+              color: Colors.grey,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

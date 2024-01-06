@@ -41,9 +41,9 @@ class _CreateTimetableState extends State<CreateTimetable> {
         ),
       ),
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 15.0),
+        padding: const EdgeInsets.only(right: 15.0, left: 15.0, bottom: 20.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
               'Create\nNew Timetable',
@@ -100,7 +100,8 @@ class _CreateTimetableState extends State<CreateTimetable> {
                 ),
               ],
             ),
-            const SizedBox(height: 20),
+            // const SizedBox(height: 20),
+            const Spacer(),
             ElevatedButton(
               onPressed: () {
                 var newTimetableProvider =
