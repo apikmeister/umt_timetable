@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:umt_timetable/screens/saved_view_timetable_screen.dart';
+import 'package:umt_timetable/views/screens/saved_view_timetable_screen.dart';
 import 'package:umt_timetable_parser/umt_timetable_parser.dart';
 
 class HomeScreen extends StatefulWidget {

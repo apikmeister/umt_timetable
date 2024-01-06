@@ -1,59 +1,21 @@
-import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_timetable_view/flutter_timetable_view.dart';
-import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:umt_timetable/providers/new_timetable_provider.dart';
 import 'package:umt_timetable_parser/umt_timetable_parser.dart';
 
-class TimetableScreen extends StatefulWidget {
-  const TimetableScreen({super.key});
+class SavedTimetableScreen extends StatefulWidget {
+  final dynamic newEntries;
+  const SavedTimetableScreen({super.key, required this.newEntries});
 
   @override
-  State<TimetableScreen> createState() => _TimetableScreenState();
+  State<SavedTimetableScreen> createState() => _SavedTimetableScreenState();
 }
 
-class _TimetableScreenState extends State<TimetableScreen> {
-  late final Future<List<LaneEvents>> timetableEvents;
+class _SavedTimetableScreenState extends State<SavedTimetableScreen> {
   MarineSchedule? marineSchedule;
-  late final dynamic newEntriesJson;
 
   Future<List<LaneEvents>> fetchTimetableEvents() async {
-    // Initialize MarinerBase and fetch data
-    var marinerBase = MarinerBase(
-        session: Provider.of<NewTimetableProvider>(context, listen: false)
-            .selectedSession!,
-        program: Provider.of<NewTimetableProvider>(context, listen: false)
-            .selectedProgram!);
-
-    // Fetch the timetable JSON
-    String year =
-        Provider.of<NewTimetableProvider>(context, listen: false).selectedYear!;
-    String timetableJson = await marinerBase.getTimetable();
-
-    Iterable l = jsonDecode(timetableJson);
-    List<MarineSchedule> entries = List<MarineSchedule>.from(
-        l.map((model) => MarineSchedule.fromJson(model)));
-    var unselectedGroups =
-        Provider.of<NewTimetableProvider>(context, listen: false)
-            .unselectedGroup;
-    List<String> courses = entries
-        .where((entry) => entry.tahun == year && entry.elektif == false)
-        .map((entry) => entry.course)
-        .toSet()
-        .toList();
-    Map<String, List<String>> groupsByCourse = {};
-    for (String course in courses) {
-      List<String> groups = entries
-          .where((entry) => entry.course == course)
-          .map((entry) => entry.group)
-          .toSet()
-          .toList();
-      groupsByCourse[course] = groups;
-    }
-
     Map<String, String> dayAbbreviations = {
       'AHAD': 'Sun',
       'ISNIN': 'Mon',
@@ -65,11 +27,6 @@ class _TimetableScreenState extends State<TimetableScreen> {
     };
 
     List<LaneEvents> events = [];
-    var newEntries = entries
-        .where((entry) => entry.tahun == year && entry.elektif == false)
-        .toList();
-    newEntries
-        .removeWhere((entry) => unselectedGroups![entry.course] == entry.group);
     Set<int> generatedColors = <int>{};
 
     Color generateUniqueColor() {
@@ -89,10 +46,10 @@ class _TimetableScreenState extends State<TimetableScreen> {
       return brightness > 0.5 ? Colors.black : Colors.white;
     }
 
-    newEntriesJson = jsonEncode(newEntries.map((e) => e.toJson()).toList());
-
-    for (var entry in newEntries) {
-      String dayAbbreviation = dayAbbreviations[entry.hari] ?? entry.hari;
+    List<MarineSchedule> marineSchedules = widget.newEntries.value;
+    for (var marineSchedule in marineSchedules) {
+      String dayAbbreviation =
+          dayAbbreviations[marineSchedule.hari] ?? marineSchedule.hari;
       if (events.isEmpty || events.last.lane.name != dayAbbreviation) {
         events.add(
           LaneEvents(
@@ -115,16 +72,16 @@ class _TimetableScreenState extends State<TimetableScreen> {
             fontSize: 9,
             color: foregroundColor,
           ),
-          title: entry.course,
+          title: marineSchedule.course,
           start: TableEventTime(
-            hour: entry.startTime,
+            hour: marineSchedule.startTime,
             minute: 0,
           ),
           end: TableEventTime(
-            hour: entry.endTime,
+            hour: marineSchedule.endTime,
             minute: 0,
           ),
-          subtitle: entry.location,
+          subtitle: marineSchedule.location,
         ),
       );
     }
@@ -133,35 +90,22 @@ class _TimetableScreenState extends State<TimetableScreen> {
 
   @override
   Widget build(BuildContext context) {
+    bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
     TimetableView timetableView;
 
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          Provider.of<NewTimetableProvider>(context, listen: false)
-              .timetableName!
-              .toUpperCase(),
-          style: const TextStyle(
-            color: Colors.black,
+          '${widget.newEntries.key.split('_')[1].toUpperCase()}',
+          style: TextStyle(
+            color: isDarkMode ? Colors.white : Colors.black54,
             fontWeight: FontWeight.bold,
             letterSpacing: 1.3,
           ),
         ),
-        backgroundColor: Colors.transparent,
+        backgroundColor: isDarkMode ? Colors.black54 : Colors.white,
         elevation: 0,
         toolbarHeight: 30,
-        actions: <Widget>[
-          IconButton(
-            onPressed: () {},
-            icon: const RotatedBox(
-              quarterTurns: 1,
-              child: Icon(
-                Icons.tune,
-                color: Colors.black,
-              ),
-            ),
-          ),
-        ],
       ),
       body: FutureBuilder(
         future: fetchTimetableEvents(),
@@ -177,8 +121,12 @@ class _TimetableScreenState extends State<TimetableScreen> {
                     laneWidth:
                         constraints.maxWidth / (newTimetables.length + .8),
                     laneHeight: 30,
-                    timeItemTextColor: Colors.black,
+                    timeItemTextColor: isDarkMode ? Colors.white : Colors.black,
                     timeItemWidth: 40,
+                    mainBackgroundColor:
+                        isDarkMode ? Colors.black54 : Colors.white,
+                    timelineBorderColor:
+                        isDarkMode ? Colors.white : Colors.black,
                   ),
                   laneEventsList: newTimetables,
                 );
@@ -192,14 +140,10 @@ class _TimetableScreenState extends State<TimetableScreen> {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          SharedPreferences prefs = await SharedPreferences.getInstance();
-          await prefs.setString(
-              'timetable_${Provider.of<NewTimetableProvider>(context, listen: false).timetableName!}',
-              newEntriesJson);
+        onPressed: () {
           Navigator.pushNamed(context, '/home');
         },
-        child: const Icon(Icons.save),
+        child: const Icon(Icons.home),
       ),
     );
   }
