@@ -20,17 +20,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     setState(() {});
   }
 
-  _gotoNext() {
-    if (currPage < items.length - 1) {
-      _controller.nextPage(
-        duration: Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-      );
-    } else {
-      Navigator.pushNamed(context, '/'); //TODO: Change this
-    }
-  }
-
   @override
   void initState() {
     super.initState();
@@ -46,6 +35,29 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        elevation: 0,
+        backgroundColor: Colors.white,
+        automaticallyImplyLeading: false,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 20, top: 20),
+            child: TextButton(
+              onPressed: () {
+                Navigator.pushReplacementNamed(context, '/home');
+              },
+              child: const Text(
+                'Skip',
+                style: TextStyle(
+                    color: Colors.black87,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w400),
+              ),
+            ),
+          ),
+        ],
+      ),
       body: SafeArea(
         child: Column(
           children: [
@@ -62,17 +74,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         SizedBox(
-                          // width: MediaQuery.of(context).size.width,
-                          // height: MediaQuery.of(context).size.height,
                           child: Padding(
                             padding: const EdgeInsets.all(30),
-                            //TODO: Add image
                             child: Lottie.asset(
                               items[index].animUrl,
                               repeat: false,
                               reverse: false,
                               animate: false,
-                              // frameRate: FrameRate(60),
                             ),
                           ),
                         ),
@@ -87,18 +95,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                 padding: const EdgeInsets.all(15),
                                 child: Text(
                                   items[index].description,
+                                  textAlign: TextAlign.center,
                                 ),
                               ),
                             ],
-                          ),
-                        ),
-                        Visibility(
-                          visible: currPage == items.length - 1,
-                          child: ElevatedButton(
-                            onPressed: () {
-                              Navigator.pushNamed(context, '/home');
-                            },
-                            child: Text('Get Started'),
                           ),
                         ),
                       ],
@@ -109,32 +109,41 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             ),
             const Spacer(),
             Container(
+              margin: const EdgeInsets.only(bottom: 60),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  for (int i = 0; i < items.length; i++)
-                    if (i == currPage)
-                      const Padding(
-                        padding: EdgeInsets.all(5),
-                        child: CircleAvatar(
-                          radius: 5,
-                          backgroundColor: Colors.black,
-                        ),
-                      )
-                    else
-                      const Padding(
-                        padding: EdgeInsets.all(5),
-                        child: CircleAvatar(
-                          radius: 5,
-                          backgroundColor: Colors.grey,
-                        ),
-                      )
-                ],
+                children: _buildIndicator(),
               ),
             ),
           ],
         ),
       ),
     );
+  }
+
+  Widget _indicator(bool isActive) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      height: 6,
+      width: isActive ? 30 : 6,
+      margin: const EdgeInsets.only(right: 5),
+      decoration: BoxDecoration(
+        color: Colors.black87,
+        borderRadius: BorderRadius.circular(5),
+      ),
+    );
+  }
+
+  List<Widget> _buildIndicator() {
+    List<Widget> indicators = [];
+    for (int i = 0; i < 3; i++) {
+      if (currPage == i) {
+        indicators.add(_indicator(true));
+      } else {
+        indicators.add(_indicator(false));
+      }
+    }
+
+    return indicators;
   }
 }

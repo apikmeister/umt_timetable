@@ -1,132 +1,161 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class AppTheme {
-  static ThemeData get defaultTheme {
-    return ThemeData(
-      // colorSchemeSeed: AppColors.primary,
-      fontFamily: "Gilroy",
-      textTheme: const TextTheme(
-          // bodyLarge: TextStyle(color: AppColors.placeholder),
-          // bodyMedium: TextStyle(color: AppColors.placeholder),
-          ),
-      scaffoldBackgroundColor: Colors.white,
-      brightness: Brightness.light,
-      appBarTheme: const AppBarTheme(
-        elevation: 0.3,
-        backgroundColor: Colors.white,
-        iconTheme: IconThemeData(color: Colors.black),
-        titleTextStyle: TextStyle(
-          color: Colors.black,
-          fontWeight: FontWeight.bold,
-          fontFamily: "Gilroy",
-        ),
-        // systemOverlayStyle: SystemUiOverlayStyle(
-        //   statusBarBrightness: Brightness.light,
-        // ),
-      ),
-      elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ElevatedButton.styleFrom(
-          // backgroundColor: AppColors.primary,
-          foregroundColor: Colors.white,
-          // padding: const EdgeInsets.all(AppDefaults.padding),
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-              // borderRadius: AppDefaults.borderRadius,
-              ),
-          textStyle: const TextStyle(fontWeight: FontWeight.w700),
-        ),
-      ),
-      outlinedButtonTheme: OutlinedButtonThemeData(
-        style: OutlinedButton.styleFrom(
-          // padding: const EdgeInsets.all(AppDefaults.padding),
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-              // borderRadius: AppDefaults.borderRadius,
-              ),
-          textStyle: const TextStyle(fontWeight: FontWeight.w700),
-        ),
-      ),
-      textButtonTheme: TextButtonThemeData(
-        style: TextButton.styleFrom(
-          textStyle: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontFamily: 'Gilroy',
-          ),
-        ),
-      ),
-      inputDecorationTheme: defaultInputDecorationTheme,
-      sliderTheme: const SliderThemeData(
-        showValueIndicator: ShowValueIndicator.always,
-        thumbColor: Colors.white,
-      ),
-      tabBarTheme: const TabBarTheme(
-        // labelColor: AppColors.primary,
-        // unselectedLabelColor: AppColors.placeholder,
-        // labelPadding: EdgeInsets.all(AppDefaults.padding),
-        indicatorSize: TabBarIndicatorSize.label,
-        labelStyle: TextStyle(
-          fontWeight: FontWeight.bold,
-          // color: AppColors.primary,
-        ),
-        unselectedLabelStyle: TextStyle(
-          fontWeight: FontWeight.bold,
-          // color: AppColors.placeholder,
-        ),
-        indicator: UnderlineTabIndicator(
-          borderSide: BorderSide(
-            // color: AppColors.primary,
-            width: 2,
-          ),
-        ),
-      ),
-    );
-  }
-
-  /* <---- Input Decorations Theme -----> */
-  static const defaultInputDecorationTheme = InputDecorationTheme(
-    // fillColor: AppColors.textInputBackground,
-    floatingLabelBehavior: FloatingLabelBehavior.never,
-    border: OutlineInputBorder(
-      borderSide: BorderSide(width: 0.1),
-      borderRadius: BorderRadius.all(Radius.circular(8)),
+ThemeData buildLightTheme(BuildContext context) {
+  return ThemeData.light().copyWith(
+    textTheme: GoogleFonts.interTextTheme(
+      Theme.of(context).textTheme,
     ),
-    enabledBorder: OutlineInputBorder(
-      borderSide: BorderSide(width: 0.1),
-      borderRadius: BorderRadius.all(Radius.circular(8)),
+    appBarTheme: AppBarTheme(
+      color: Colors.transparent,
+      foregroundColor: Colors.black,
+      elevation: 0,
+      iconTheme: const IconThemeData(
+        color: Colors.black,
+      ),
+      titleTextStyle: GoogleFonts.inter(
+        color: Colors.black,
+        fontSize: 24,
+        fontWeight: FontWeight.w600,
+      ),
+      // TextStyle(
+      //   color: Colors.black,
+      //   fontSize: 24,
+      //   fontWeight: FontWeight.w600,
+      // ),
     ),
-    focusedBorder: OutlineInputBorder(
-      borderSide: BorderSide(width: 0.1),
-      borderRadius: BorderRadius.all(Radius.circular(8)),
+    textSelectionTheme: TextSelectionThemeData(
+      cursorColor: Colors.deepPurple,
+      selectionColor: Colors.deepPurple.withOpacity(0.4),
+      selectionHandleColor: Colors.deepPurple,
     ),
-    // suffixIconColor: AppColors.placeholder,
+    inputDecorationTheme: const InputDecorationTheme(
+      filled: true,
+      fillColor: Color(0xFFF5F5F5),
+      hintStyle: TextStyle(
+        color: Color(0xFFB8B5C3),
+      ),
+      border: OutlineInputBorder(
+        // borderSide: BorderSide.none,
+        borderRadius: BorderRadius.all(Radius.circular(12)),
+      ),
+      enabledBorder: OutlineInputBorder(
+        // borderSide: BorderSide.none,
+        borderRadius: BorderRadius.all(Radius.circular(12)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        // borderSide: BorderSide.none,
+        borderRadius: BorderRadius.all(Radius.circular(12)),
+      ),
+    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        // primary: primaryColor,
+        foregroundColor: Colors.black87,
+        minimumSize: const Size(double.infinity, 56),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(12)),
+        ),
+      ),
+    ),
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: OutlinedButton.styleFrom(
+        foregroundColor: Colors.black,
+        minimumSize: const Size(double.infinity, 56),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(12)),
+        ),
+      ),
+    ),
+    radioTheme: RadioThemeData(
+      fillColor:
+          MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+        if (states.contains(MaterialState.selected)) {
+          return Colors.purple; // the color when radio button is selected
+        }
+        return Colors.grey; // the color when radio button is unselected
+      }),
+    ),
+    expansionTileTheme: const ExpansionTileThemeData(
+      iconColor: Colors.black,
+      textColor: Colors.black,
+      expandedAlignment: Alignment.centerLeft,
+    ),
   );
+}
 
-  static const secondaryInputDecorationTheme = InputDecorationTheme(
-    // fillColor: AppColors.textInputBackground,
-    filled: true,
-    floatingLabelBehavior: FloatingLabelBehavior.never,
-    border: OutlineInputBorder(
-      borderSide: BorderSide.none,
-      borderRadius: BorderRadius.all(Radius.circular(8)),
+ThemeData buildDarkTheme(BuildContext context) {
+  return ThemeData.dark().copyWith(
+    textTheme: GoogleFonts.interTextTheme(
+      Theme.of(context)
+          .textTheme
+          .apply(bodyColor: Colors.white, displayColor: Colors.white),
     ),
-    enabledBorder: OutlineInputBorder(borderSide: BorderSide.none),
-    focusedBorder: OutlineInputBorder(borderSide: BorderSide.none),
-  );
-
-  static final otpInputDecorationTheme = InputDecorationTheme(
-    floatingLabelBehavior: FloatingLabelBehavior.never,
-    border: OutlineInputBorder(
-      borderSide: const BorderSide(width: 0.1),
-      borderRadius: BorderRadius.circular(25),
+    appBarTheme: AppBarTheme(
+      color: Colors.black, // Adjusted for dark theme
+      foregroundColor: Colors.white,
+      elevation: 0,
+      iconTheme: const IconThemeData(
+        color: Colors.white,
+      ),
+      titleTextStyle: GoogleFonts.inter(
+        color: Colors.white,
+        fontSize: 24,
+        fontWeight: FontWeight.w600,
+      ),
     ),
-    enabledBorder: OutlineInputBorder(
-      borderSide: const BorderSide(width: 0.1),
-      borderRadius: BorderRadius.circular(25),
+    textSelectionTheme: TextSelectionThemeData(
+      cursorColor: Colors.deepPurple,
+      selectionColor: Colors.deepPurple.withOpacity(0.4),
+      selectionHandleColor: Colors.deepPurple,
     ),
-    focusedBorder: OutlineInputBorder(
-      borderSide: const BorderSide(width: 0.1),
-      borderRadius: BorderRadius.circular(25),
+    inputDecorationTheme: const InputDecorationTheme(
+      filled: true,
+      fillColor: Color(0xFF303030), // Adjusted for dark theme
+      hintStyle: TextStyle(
+        color: Color(0xFFB8B5C3),
+      ),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.all(Radius.circular(12)),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.all(Radius.circular(12)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.all(Radius.circular(12)),
+      ),
+    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        foregroundColor: Colors.deepPurple, // Adjusted for dark theme
+        minimumSize: const Size(double.infinity, 56),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(12)),
+        ),
+      ),
+    ),
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: OutlinedButton.styleFrom(
+        foregroundColor: Colors.white, // Adjusted for dark theme
+        minimumSize: const Size(double.infinity, 56),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(12)),
+        ),
+      ),
+    ),
+    radioTheme: RadioThemeData(
+      fillColor:
+          MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+        if (states.contains(MaterialState.selected)) {
+          return Colors.deepPurple; // Adjusted for dark theme
+        }
+        return Colors.grey; // Adjusted for dark theme
+      }),
+    ),
+    expansionTileTheme: const ExpansionTileThemeData(
+      iconColor: Colors.white, // Adjusted for dark theme
+      textColor: Colors.white, // Adjusted for dark theme
+      expandedAlignment: Alignment.centerLeft,
     ),
   );
 }
