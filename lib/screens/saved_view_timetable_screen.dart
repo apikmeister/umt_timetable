@@ -17,7 +17,7 @@ class SavedTimetableScreen extends StatefulWidget {
 }
 
 class _SavedTimetableScreenState extends State<SavedTimetableScreen> {
-  late final Future<List<LaneEvents>> timetableEvents;
+  // late final Future<List<LaneEvents>> timetableEvents;
   MarineSchedule? marineSchedule;
   // late final newEntries;
 
@@ -97,52 +97,55 @@ class _SavedTimetableScreenState extends State<SavedTimetableScreen> {
 
     // print(newEntries);
     // print(widget.newEntries);
-    for (var entry in widget.newEntries) {
-      String timetableKey = entry.key;
-      List<MarineSchedule> marineSchedules = entry.value;
-      print(marineSchedules);
-      for (var marineSchedule in marineSchedules) {
-        String dayAbbreviation = dayAbbreviations[marineSchedule.hari] ?? marineSchedule.hari;
-        if (events.isEmpty || events.last.lane.name != dayAbbreviation) {
-          events.add(
-            LaneEvents(
-              lane: Lane(
-                name: dayAbbreviation,
-                textStyle: TextStyle(
-                  fontFamily: 'Inter',
-                ),
-                // marineSchedule.hari
+    String timetableKey = widget.newEntries.key;
+    List<MarineSchedule> marineSchedules = widget.newEntries.value;
+// rest of your code
+    // for (var entry in widget.newEntries.entries) {
+    //   String timetableKey = entry.key;
+    //   List<MarineSchedule> marineSchedules = entry.value;
+    //   print(marineSchedules);
+    for (var marineSchedule in marineSchedules) {
+      String dayAbbreviation =
+          dayAbbreviations[marineSchedule.hari] ?? marineSchedule.hari;
+      if (events.isEmpty || events.last.lane.name != dayAbbreviation) {
+        events.add(
+          LaneEvents(
+            lane: Lane(
+              name: dayAbbreviation,
+              textStyle: TextStyle(
+                fontFamily: 'Inter',
               ),
-              events: [],
+              // marineSchedule.hari
             ),
-          );
-        }
-        Color backgroundColor = generateUniqueColor();
-        Color foregroundColor = textColor(backgroundColor);
-        events.last.events.add(
-          TableEvent(
-            // padding: const EdgeInsets.all(8),
-            // margin: const EdgeInsets.all(4),
-            backgroundColor: backgroundColor,
-            textStyle: TextStyle(
-              fontSize: 9,
-              color: foregroundColor,
-            ),
-            title: marineSchedule.course,
-            start: TableEventTime(
-              hour: marineSchedule.startTime,
-              minute: 0,
-            ),
-            end: TableEventTime(
-              hour: marineSchedule.endTime,
-              minute: 0,
-            ),
-            subtitle: marineSchedule.location,
+            events: [],
           ),
         );
       }
+      Color backgroundColor = generateUniqueColor();
+      Color foregroundColor = textColor(backgroundColor);
+      events.last.events.add(
+        TableEvent(
+          // padding: const EdgeInsets.all(8),
+          // margin: const EdgeInsets.all(4),
+          backgroundColor: backgroundColor,
+          textStyle: TextStyle(
+            fontSize: 9,
+            color: foregroundColor,
+          ),
+          title: marineSchedule.course,
+          start: TableEventTime(
+            hour: marineSchedule.startTime,
+            minute: 0,
+          ),
+          end: TableEventTime(
+            hour: marineSchedule.endTime,
+            minute: 0,
+          ),
+          subtitle: marineSchedule.location,
+        ),
+      );
+      // }
     }
-    print(events);
     return events;
   }
 

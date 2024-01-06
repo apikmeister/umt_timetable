@@ -44,6 +44,11 @@ class _HomeScreenState extends State<HomeScreen> {
     return savedTimetables;
   }
 
+  Future<void> deleteTimetable(String key) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove(key);
+  }
+
   // @override
   // void initState() {
   //   super.initState();
@@ -108,23 +113,37 @@ class _HomeScreenState extends State<HomeScreen> {
                                       String key =
                                           snapshot.data!.keys.elementAt(index);
                                       return ListTile(
-                                        title: Text(key.split('_')[1]),
-                                        onTap: () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) =>
-                                                  SavedTimetableScreen(
-                                                newEntries: snapshot
-                                                    .data!.entries
-                                                    .elementAt(index),
+                                          title: Text(key.split('_')[1]),
+                                          onTap: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    SavedTimetableScreen(
+                                                  newEntries: snapshot
+                                                      .data!.entries
+                                                      .elementAt(index),
+                                                ),
                                               ),
-                                            ),
-                                          );
-                                          // Handle tap event, e.g. navigate to timetable details page
-                                        },
-                                        trailing: Icon(Icons.arrow_forward_ios),
-                                      );
+                                            );
+                                            // Handle tap event, e.g. navigate to timetable details page
+                                          },
+                                          trailing: IconButton(
+                                            onPressed: () {
+                                              deleteTimetable(key);
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(
+                                                SnackBar(
+                                                  content:
+                                                      Text('Timetable deleted'),
+                                                  duration: const Duration(
+                                                      seconds: 1),
+                                                ),
+                                              );
+                                              setState(() {});
+                                            },
+                                            icon: const Icon(Icons.delete),
+                                          ));
                                     },
                                   )
                                 : _buildNoTimetable();
