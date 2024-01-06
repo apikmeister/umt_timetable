@@ -146,8 +146,10 @@ class _TimetableScreenState extends State<TimetableScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Timetable',
+        title: Text(
+          Provider.of<NewTimetableProvider>(context, listen: false)
+              .timetableName!
+              .toUpperCase(),
           style: TextStyle(
             color: Colors.black,
             fontWeight: FontWeight.bold,

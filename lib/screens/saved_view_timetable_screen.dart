@@ -156,8 +156,8 @@ class _SavedTimetableScreenState extends State<SavedTimetableScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Timetable',
+        title: Text(
+          '${widget.newEntries.key.split('_')[1].toUpperCase()}',
           style: TextStyle(
             color: Colors.black,
             fontWeight: FontWeight.bold,
