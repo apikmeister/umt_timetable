@@ -1,5 +1,6 @@
 import 'package:umt_timetable/model/onboarding_model.dart';
 
+// This is the data class for the onboarding screen
 class OnboardingData {
   static List<OnboardingModel> data = [
     OnboardingModel(

@@ -37,6 +37,7 @@ class _TimetableScreenState extends State<TimetableScreen> {
     Iterable l = jsonDecode(timetableJson);
     List<MarineSchedule> entries = List<MarineSchedule>.from(
         l.map((model) => MarineSchedule.fromJson(model)));
+    // Filter the timetable JSON based on the selected year
     var unselectedGroups =
         Provider.of<NewTimetableProvider>(context, listen: false)
             .unselectedGroup;
@@ -55,6 +56,7 @@ class _TimetableScreenState extends State<TimetableScreen> {
       groupsByCourse[course] = groups;
     }
 
+    // change the day name to abbreviation
     Map<String, String> dayAbbreviations = {
       'AHAD': 'Sun',
       'ISNIN': 'Mon',
@@ -69,10 +71,12 @@ class _TimetableScreenState extends State<TimetableScreen> {
     newEntries = entries
         .where((entry) => entry.tahun == year && entry.elektif == false)
         .toList();
+    // filter groups for duplicate courses
     newEntries
         .removeWhere((entry) => unselectedGroups![entry.course] == entry.group);
-    Set<int> generatedColors = <int>{};
 
+    Set<int> generatedColors = <int>{};
+    // Generate a unique color for each course
     Color generateUniqueColor() {
       int colorValue;
       do {
@@ -82,6 +86,7 @@ class _TimetableScreenState extends State<TimetableScreen> {
       return Color(0xFF000000 + colorValue);
     }
 
+    // Generate a text color based on each course background color
     Color textColor(Color backgroundColor) {
       double brightness = (backgroundColor.red * 299 +
               backgroundColor.green * 587 +
@@ -92,6 +97,7 @@ class _TimetableScreenState extends State<TimetableScreen> {
 
     // newEntriesJson = jsonEncode(newEntries.map((e) => e.toJson()).toList());
 
+    // Generate the timetable events
     for (var entry in newEntries) {
       String dayAbbreviation = dayAbbreviations[entry.hari] ?? entry.hari;
       if (events.isEmpty || events.last.lane.name != dayAbbreviation) {
@@ -190,6 +196,7 @@ class _TimetableScreenState extends State<TimetableScreen> {
           SharedPreferences prefs = await SharedPreferences.getInstance();
           var newEntriesJson =
               jsonEncode(newEntries.map((e) => e.toJson()).toList());
+          // Saved the timetable to shared preferences
           await prefs.setString(
               'timetable_${Provider.of<NewTimetableProvider>(context, listen: false).timetableName!}',
               newEntriesJson);

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+// themedata for light mode
 ThemeData buildLightTheme(BuildContext context) {
   return ThemeData.light().copyWith(
     textTheme: GoogleFonts.interTextTheme(
@@ -51,7 +52,7 @@ ThemeData buildLightTheme(BuildContext context) {
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         // primary: primaryColor,
-        foregroundColor: Colors.black87,
+        backgroundColor: Colors.black87,
         minimumSize: const Size(double.infinity, 56),
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(12)),
@@ -84,6 +85,7 @@ ThemeData buildLightTheme(BuildContext context) {
   );
 }
 
+// themedata for dark mode
 ThemeData buildDarkTheme(BuildContext context) {
   return ThemeData.dark().copyWith(
     textTheme: GoogleFonts.interTextTheme(
@@ -127,7 +129,7 @@ ThemeData buildDarkTheme(BuildContext context) {
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        foregroundColor: Colors.deepPurple, // Adjusted for dark theme
+        backgroundColor: Colors.deepPurple, // Adjusted for dark theme
         minimumSize: const Size(double.infinity, 56),
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(12)),

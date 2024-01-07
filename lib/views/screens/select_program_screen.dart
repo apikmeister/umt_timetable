@@ -90,6 +90,7 @@ class _SelectProgramState extends State<SelectProgram> {
     );
   }
 
+  // build dropdown menu for faculty
   Future<Widget> _facultyDropdown() async {
     try {
       List<Faculty> faculties = await timetableService.getFaculties(
@@ -118,6 +119,7 @@ class _SelectProgramState extends State<SelectProgram> {
     }
   }
 
+  // build list of programs from the selected faculty
   Future<Widget> _programList() async {
     try {
       List<Program> programs = await timetableService.getPrograms(

@@ -1,3 +1,8 @@
+/* 
+This file is a copy from lib/views/screens/view_timetable_screen.dart
+with some modifications to make it work with the saved timetable.
+*/
+
 import 'dart:math';
 
 import 'package:flutter/material.dart';

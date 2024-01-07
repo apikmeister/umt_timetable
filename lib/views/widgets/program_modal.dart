@@ -6,15 +6,16 @@ import 'package:umt_timetable/providers/new_timetable_provider.dart';
 import 'package:umt_timetable_parser/umt_timetable_parser.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 
+// modal sheet for choosing year of studies
 WoltModalSheetPage studyYearPage(BuildContext modalSheetContext,
     TextTheme textTheme, ValueNotifier<int> pageIndexNotifier) {
+  // get the selected session and program from the provider
   var marinerBase = MarinerBase(
-      session:
-          Provider.of<NewTimetableProvider>(modalSheetContext, listen: false)
-              .selectedSession!,
-      program:
-          Provider.of<NewTimetableProvider>(modalSheetContext, listen: false)
-              .selectedProgram!);
+    session: Provider.of<NewTimetableProvider>(modalSheetContext, listen: false)
+        .selectedSession!,
+    program: Provider.of<NewTimetableProvider>(modalSheetContext, listen: false)
+        .selectedProgram!,
+  );
 
   return WoltModalSheetPage(
     navBarHeight: 56,
@@ -116,6 +117,7 @@ WoltModalSheetPage studyYearPage(BuildContext modalSheetContext,
   );
 }
 
+// modal sheet for choosing courses that have multiple groups/duplicated
 WoltModalSheetPage duplicateCourseModal(
     BuildContext modalSheetContext,
     TextTheme textTheme,
@@ -127,12 +129,15 @@ WoltModalSheetPage duplicateCourseModal(
   Map<String, String?> unselectedGroups = {};
   var year = Provider.of<NewTimetableProvider>(modalSheetContext, listen: false)
       .selectedYear;
+  // get all courses that are not electives and group them by course make it unique in set
   List<String> courses = entries
       .where((entry) => entry.tahun == year && entry.elektif == false)
       .map((entry) => entry.course)
       .toSet()
       .toList();
   Map<String, List<String>> groupsByCourse = {};
+
+  /// get all groups for each course
   for (String course in courses) {
     List<String> groups = entries
         .where((entry) => entry.course == course)
@@ -141,6 +146,7 @@ WoltModalSheetPage duplicateCourseModal(
         .toList();
     groupsByCourse[course] = groups;
   }
+  // get all courses that have multiple groups
   List<dynamic> coursesWithMultipleGroups = [];
   for (String course in groupsByCourse.keys) {
     if (groupsByCourse[course]!.length > 1) {
@@ -182,7 +188,7 @@ WoltModalSheetPage duplicateCourseModal(
                           onChanged: (String? value) {
                             setState(() {
                               selectedGroups[course] = value;
-
+                              // get the unselected groups for each course to be filtered out later
                               unselectedGroups[course] = groupsByCourse[course]
                                   ?.where((group) => group != value)
                                   .toList()
@@ -246,6 +252,7 @@ WoltModalSheetPage duplicateCourseModal(
       : woltModalSheetPage;
 }
 
+// modal sheet for enter timetable name
 WoltModalSheetPage timetableNameModal(BuildContext modalSheetContext,
     TextTheme textTheme, ValueNotifier<int> pageIndexNotifier) {
   TextEditingController timetableNameController = TextEditingController();
@@ -269,6 +276,7 @@ WoltModalSheetPage timetableNameModal(BuildContext modalSheetContext,
           const SizedBox(height: 20),
           ElevatedButton(
             onPressed: () {
+              // check if the timetable name is not empty to proceed
               if (timetableNameController.text.isNotEmpty) {
                 Provider.of<NewTimetableProvider>(modalSheetContext,
                         listen: false)

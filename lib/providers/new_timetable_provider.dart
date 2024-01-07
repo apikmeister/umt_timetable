@@ -7,12 +7,14 @@ class NewTimetableProvider extends ChangeNotifier {
   String? _timetableName;
   Map<String, String?>? unselectedGroups;
 
+  // getters
   String? get selectedSession => _selectedSession;
   String? get selectedProgram => _selectedProgram;
   String? get selectedYear => _selectedYear;
   String? get timetableName => _timetableName;
   Map<String, String?>? get unselectedGroup => unselectedGroups;
 
+  // setters
   void setTimetableName(String timetableName) {
     _timetableName = timetableName;
     notifyListeners();
@@ -38,6 +40,7 @@ class NewTimetableProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  // reset the selected session
   void resetSelectedSession() {
     _selectedSession = null;
     notifyListeners();

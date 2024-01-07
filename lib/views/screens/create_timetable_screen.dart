@@ -115,6 +115,7 @@ class _CreateTimetableState extends State<CreateTimetable> {
     );
   }
 
+  // build dropdown menu for semester based on selected study grade
   Widget _semesterDropdown() {
     return FutureBuilder(
       future: () async {
@@ -165,6 +166,7 @@ class _CreateTimetableState extends State<CreateTimetable> {
     );
   }
 
+  // build dropdown menu for study grade fetch from the UMT website
   Future<Widget> _studyGradeDropdown() async {
     try {
       String timetableJson = await getSemester();

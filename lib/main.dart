@@ -28,6 +28,8 @@ class MyApp extends StatelessWidget {
         ),
       ],
       child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        // routes for navigation
         initialRoute: '/onboarding',
         routes: {
           '/home': (context) => const HomeScreen(),
@@ -36,7 +38,8 @@ class MyApp extends StatelessWidget {
           '/view_timetable': (context) => const TimetableScreen(),
           '/create_timetable': (context) => const CreateTimetable(),
         },
-        title: 'UMT Timetable',
+        title: 'Marine Scheduler',
+        // Initialize the theme
         theme: buildLightTheme(context),
         darkTheme: buildDarkTheme(context),
         home: const HomeScreen(),
@@ -45,6 +48,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
+// this is to avoid the error of SSL certificate
 class MyHttpOverrides extends HttpOverrides {
   @override
   HttpClient createHttpClient(SecurityContext? context) {

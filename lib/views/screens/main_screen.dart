@@ -16,14 +16,8 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   bool hasTimetable = false;
-  List<String> timetableList = [
-    'Monday',
-    'Tuesday',
-    'Wednesday',
-    'Thursday',
-    'Friday'
-  ];
 
+  // get the saved timetable from shared preferences that starts with 'timetable_'
   Future<Map<String, List<MarineSchedule>>> getTimetableList() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     Map<String, List<MarineSchedule>> savedTimetables = {};
@@ -41,6 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return savedTimetables;
   }
 
+  // delete the saved timetable from shared preferences
   Future<void> deleteTimetable(String key) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.remove(key);
@@ -158,6 +153,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  // Widget to display when there is no timetable saved
   Widget _buildNoTimetable() {
     return Center(
       child: Column(

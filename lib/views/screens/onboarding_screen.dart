@@ -15,6 +15,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   late PageController _controller;
   List<OnboardingModel> items = OnboardingData.data;
 
+  // this function is to update the current page when the page is changed
   onPageChange(int page) {
     currPage = page;
     setState(() {});
@@ -121,6 +122,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 
+  // this function is to build the indicator for the page view to show the current page
   Widget _indicator(bool isActive) {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),

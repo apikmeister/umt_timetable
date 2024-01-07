@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+// This is the model class for the onboarding screen
 class OnboardingModel {
   String animUrl;
   String title;
